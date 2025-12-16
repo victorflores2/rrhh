@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Colaborador V6 - Workmate Style</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Colores diferenciados para el Contratista (Verde/Teal) */
+            --brand: #0f766e; 
+            --brand-dark: #134e4a;
+            --bg: #f3f4f6;
+            --white: #ffffff;
+            --border: #e5e7eb;
+            --text: #374151;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .logo { padding: 1.5rem; font-size: 1.2rem; font-weight: 800; color: var(--brand-dark); border-bottom: 1px solid var(--border); display:flex; align-items:center; gap:10px; }
+        .menu { flex: 1; padding-top: 1rem; }
+        .menu-item { padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 10px; color: #6b7280; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.2s; border-left: 4px solid transparent; cursor: pointer; }
+        .menu-item:hover { background: #f0fdfa; color: var(--brand); }
+        .menu-item.active { background: #f0fdfa; color: var(--brand-dark); border-left-color: var(--brand); }
+
+        /* MAIN CONTENT */
+        .main { flex: 1; overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .company-info { background: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        /* VISTAS */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeEffect 0.3s; }
+        @keyframes fadeEffect { from {opacity: 0; transform: translateY(5px);} to {opacity: 1; transform: translateY(0);} }
+
+        /* CARDS */
+        .card { background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        /* DASHBOARD ACTIONS */
+        .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .action-btn-card { background: white; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .action-btn-card:hover { border-color: var(--brand); transform: translateY(-3px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .action-icon { font-size: 2rem; color: var(--brand); margin-bottom: 1rem; display: block; }
+
+        /* WIZARD (MANUAL PDF) */
+        .wizard-steps { display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; padding: 0 20px; }
+        .wizard-steps::before { content: ''; position: absolute; top: 15px; left: 20px; right: 20px; height: 2px; background: #e5e7eb; z-index: 0; }
+        .step { position: relative; z-index: 1; background: white; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9ca3af; font-size: 0.9rem; }
+        .step.active { border-color: var(--brand); background: var(--brand); color: white; }
+        .step-label { position: absolute; top: 35px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; white-space: nowrap; color: #6b7280; }
+
+        /* TABLAS */
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 10px; background: #f9fafb; color: #6b7280; border-bottom: 1px solid var(--border); }
+        td { padding: 10px; border-bottom: 1px solid var(--border); }
+        
+        /* BOTONES */
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+        .btn-brand { background: var(--brand); color: white; }
+        .btn-brand:hover { background: var(--brand-dark); }
+        .btn-outline { border: 1px solid #d1d5db; background: white; color: #374151; }
+
+        /* ALERTA MANUAL */
+        .alert-box { background: #fff7ed; border-left: 4px solid #f97316; padding: 1rem; color: #9a3412; font-size: 0.9rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+
+        /* FORM GRID */
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 5px; }
+        .form-input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
+        .required { color: var(--danger); }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo"><i class="fa-solid fa-hard-hat"></i> Portal Contratista</div>
+        <div class="menu">
+            <a onclick="showView('home')" class="menu-item active" id="menu-home"><i class="fa-solid fa-home"></i> Inicio</a>
+            <a onclick="showView('contratos')" class="menu-item" id="menu-contratos"><i class="fa-solid fa-file-contract"></i> Mis Contratos</a>
+            <a onclick="showView('acreditacion')" class="menu-item" id="menu-acreditacion"><i class="fa-solid fa-user-plus"></i> Acreditación Personal</a>
+            <a onclick="showView('vehiculos')" class="menu-item" id="menu-vehiculos"><i class="fa-solid fa-truck"></i> Acreditación Vehículos</a>
+            <a onclick="showView('f30')" class="menu-item" id="menu-f30"><i class="fa-solid fa-file-invoice-dollar"></i> Carga F30 (Pagos)</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h2 style="color: #111827;">Bienvenido, Usuario Contratista</h2>
+            <div class="company-info"><i class="fa-solid fa-building"></i> Empresa: <strong>CONSTRUCTORA LOS ANDES</strong></div>
+        </div>
+
+        <div id="home" class="view-section active">
+            
+            <div class="alert-box">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div>
+                    <strong>Atención:</strong> Tienes 5 trabajadores con documentos por vencer en 3 días. Sube la documentación para evitar bloqueos en garita.
+                </div>
+                <button class="btn btn-outline" style="margin-left:auto; font-size:0.8rem;">Ver Lista</button>
+            </div>
+
+            <div class="actions-grid">
+                <div class="action-btn-card" onclick="showView('acreditacion')">
+                    <i class="fa-solid fa-user-plus action-icon"></i>
+                    <h3>Acreditar Personal</h3>
+                    <p style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Nuevo ingreso o renovación</p>
+                </div>
+                <div class="action-btn-card" onclick="showView('vehiculos')">
+                    <i class="fa-solid fa-truck-pickup action-icon"></i>
+                    <h3>Acreditar Vehículo</h3>
+                    <p style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Pases y revisión técnica</p>
+                </div>
+                <div class="action-btn-card" onclick="showView('f30')">
+                    <i class="fa-solid fa-file-invoice action-icon"></i>
+                    <h3>Subir F30</h3>
+                    <p style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Liberar Estado de Pago</p>
+                </div>
+                <div class="action-btn-card">
+                    <i class="fa-solid fa-users-viewfinder action-icon"></i>
+                    <h3>Mi Dotación</h3>
+                    <p style="font-size:0.8rem; color:#6b7280; margin-top:5px;">155 Trabajadores Activos</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:2rem;">
+                <h3>Mis Solicitudes Recientes (Manual Fig 24)</h3>
+                <table style="margin-top:1rem;">
+                    <thead>
+                        <tr><th>ID Solicitud</th><th>Tipo</th><th>Sujeto</th><th>Fecha</th><th>Estado Workmate</th><th>Estado Codelco</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>#18902</td><td>Personal</td><td>Juan Pérez</td><td>Hoy 10:00</td><td><span style="color:#d97706">● En Revisión</span></td><td>Pendiente</td></tr>
+                        <tr><td>#18855</td><td>Vehículo</td><td>GJ-YT-99</td><td>Ayer</td><td><span style="color:#15803d">● Aprobado</span></td><td><span style="color:#15803d">● Aprobado</span></td></tr>
+                        <tr><td>#18801</td><td>Pase Visita</td><td>Tec. Soporte</td><td>12/08/2023</td><td><span style="color:#ef4444">● Rechazado</span></td><td>-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="contratos" class="view-section">
+            <h3>Gestión de Contratos</h3>
+            <p style="margin-bottom:1rem; color:#6b7280; font-size:0.9rem;">Seleccione un contrato para gestionar su personal o vehículos.</p>
+
+            <div class="card" style="border-left: 5px solid var(--brand);">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div>
+                        <h4 style="color:var(--brand-dark);">CONTRATO N° 4501441526</h4>
+                        <span style="font-size:0.8rem; color:#6b7280;">Servicio Obras Civiles | ADC: María Muñoz</span>
+                    </div>
+                    <span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:10px; font-size:0.75rem; font-weight:bold;">VIGENTE</span>
+                </div>
+                
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; font-size:0.9rem;">
+                    <div><strong>Inicio:</strong> 01-01-2023</div>
+                    <div><strong>Término:</strong> 31-12-2024</div>
+                    <div><strong>Dotación:</strong> 155 / 150</div>
+                    <div><strong>Vehículos:</strong> 45</div>
+                </div>
+
+                <div style="margin-top:1.5rem; display:flex; gap:10px; justify-content:flex-end;">
+                    <button class="btn btn-outline" onclick="showView('acreditacion')"><i class="fa-solid fa-users"></i> Acreditar Personal</button>
+                    <button class="btn btn-outline" onclick="showView('vehiculos')"><i class="fa-solid fa-car"></i> Acreditar Vehículos</button>
+                    <button class="btn btn-brand"><i class="fa-solid fa-eye"></i> Ver Detalle</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="acreditacion" class="view-section">
+            <h3>Nueva Solicitud de Acreditación</h3>
+            
+            <div class="card">
+                <div class="wizard-steps">
+                    <div class="step active">1<span class="step-label">Personal</span></div>
+                    <div class="step">2<span class="step-label">Contrato</span></div>
+                    <div class="step">3<span class="step-label">Licencia</span></div>
+                    <div class="step">4<span class="step-label">Documentos</span></div>
+                </div>
+
+                <h4 style="margin-bottom:1rem; color:var(--brand-dark);">1. Información Personal (Manual Fig 27)</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">RUT <span class="required">*</span></label>
+                        <div style="display:flex; gap:5px;">
+                            <input type="text" class="form-input" placeholder="12345678-9">
+                            <button class="btn btn-brand" style="padding:5px 10px;">Buscar</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nombres <span class="required">*</span></label>
+                        <input type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Apellidos <span class="required">*</span></label>
+                        <input type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nacionalidad</label>
+                        <select class="form-input"><option>Chilena</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha Nacimiento</label>
+                        <input type="date" class="form-input">
+                    </div>
+                </div>
+
+                <h4 style="margin-bottom:1rem; color:var(--brand-dark); margin-top:2rem; border-top:1px solid #eee; padding-top:1rem;">2. Información Contractual (Manual Fig 28)</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Contrato Comercial (Padre) <span class="required">*</span></label>
+                        <select class="form-input">
+                            <option>4501441526 - Obras Civiles</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cargo <span class="required">*</span></label>
+                        <select class="form-input"><option>Maestro Primera</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Turno <span class="required">*</span></label>
+                        <select class="form-input">
+                            <option>7x7 (A)</option>
+                            <option>4x3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha Inicio Contrato</label>
+                        <input type="date" class="form-input">
+                    </div>
+                </div>
+
+                <div style="margin-top:2rem; display:flex; justify-content:flex-end; gap:10px;">
+                    <button class="btn btn-outline">Guardar Borrador</button>
+                    <button class="btn btn-brand" onclick="alert('Avanza a carga documental (Simulado)')">Siguiente Paso ></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="vehiculos" class="view-section">
+            <h3>Acreditación de Vehículos</h3>
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">Ingrese Patente a Acreditar:</label>
+                    <div style="display:flex; gap:10px; max-width:400px;">
+                        <input type="text" class="form-input" placeholder="ABCD-12">
+                        <button class="btn btn-brand">Buscar Datos</button>
+                    </div>
+                    <p style="font-size:0.8rem; color:#6b7280; margin-top:5px;">Si la patente no existe, se habilitará el formulario de nuevo registro.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="f30" class="view-section">
+            <h3>Carga Mensual de Obligaciones (F30)</h3>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                    <div>
+                        <h4 style="color:var(--brand-dark);">Periodo: Agosto 2023</h4>
+                        <span style="font-size:0.85rem; color:#ef4444;">Estado: Bloqueado (Faltan documentos)</span>
+                    </div>
+                    <button class="btn btn-brand">Enviar a Revisión</button>
+                </div>
+
+                <table style="border:1px solid var(--border);">
+                    <tr style="background:#f9fafb;">
+                        <th>Documento Requerido</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                    <tr>
+                        <td>Certificado F30-1 (DT)</td>
+                        <td><i class="fa-solid fa-check-circle" style="color:var(--success)"></i> Cargado</td>
+                        <td><button class="btn btn-outline" style="padding:2px 8px; font-size:0.7rem;">Ver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Comprobante Pago Remuneraciones</td>
+                        <td><i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i> Pendiente</td>
+                        <td><button class="btn btn-brand" style="padding:2px 8px; font-size:0.7rem;">Subir</button></td>
+                    </tr>
+                    <tr>
+                        <td>Pago Cotizaciones (Previred)</td>
+                        <td><i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i> Pendiente</td>
+                        <td><button class="btn btn-brand" style="padding:2px 8px; font-size:0.7rem;">Subir</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function showView(viewId) {
+            // Ocultar todas
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            // Mostrar seleccionada
+            const target = document.getElementById(viewId);
+            if(target) target.classList.add('active');
+
+            // Actualizar menú
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            const menuBtn = document.getElementById('menu-' + viewId);
+            if(menuBtn) menuBtn.classList.add('active');
+        }
+
+        // Iniciar en Home
+        document.addEventListener('DOMContentLoaded', () => {
+            showView('home');
+        });
+    </script>
+</body>
+</html>

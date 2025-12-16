@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCMinero V6 - Portal Mandante Full</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a; /* Azul oscuro minero */
+            --secondary: #1e293b;
+            --accent: #d97706; /* Naranja seguridad */
+            --success: #15803d;
+            --danger: #b91c1c;
+            --light: #f1f5f9;
+            --border: #cbd5e1;
+            --workmate-blue: #0284c7;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background-color: #f8fafc; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: #334155; 
+        }
+
+        /* SIDEBAR COMPLETO */
+        .sidebar { 
+            width: 280px; 
+            background: var(--primary); 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0; 
+            overflow-y: auto;
+        }
+        
+        .logo { 
+            padding: 1.5rem; 
+            font-size: 1.3rem; 
+            font-weight: 800; 
+            border-bottom: 1px solid #334155; 
+            display:flex; 
+            align-items:center; 
+            gap:10px; 
+            background: #020617;
+        }
+        .logo i { color: var(--accent); }
+        
+        .menu { flex: 1; padding-top: 1rem; }
+        
+        .menu-category {
+            padding: 15px 25px 5px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748b;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .menu-item { 
+            padding: 0.8rem 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            color: #cbd5e1; 
+            transition: 0.2s; 
+            text-decoration: none; 
+            border-left: 4px solid transparent; 
+            font-size: 0.95rem;
+        }
+        
+        .menu-item:hover { background: var(--secondary); color: white; }
+        .menu-item.active { background: var(--secondary); color: white; border-left-color: var(--accent); }
+        
+        /* AREA PRINCIPAL */
+        .main { flex: 1; overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 2rem; 
+            align-items: center; 
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* VISTAS (SECCIONES) */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* KPI CARDS */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .kpi-value { font-size: 2rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
+        .kpi-label { font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
+
+        /* TABLAS */
+        .table-responsive { overflow-x: auto; background: white; border-radius: 8px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f1f5f9; text-align: left; padding: 1rem; font-size: 0.85rem; text-transform: uppercase; color: #475569; border-bottom: 2px solid var(--border); }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+        
+        /* ESTADOS Y BOTONES */
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap:5px; }
+        .bg-ok { background: #dcfce7; color: #166534; }
+        .bg-warn { background: #fef9c3; color: #854d0e; }
+        .bg-err { background: #fee2e2; color: #991b1b; }
+
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-blue { background: var(--workmate-blue); color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        .btn-outline { border: 1px solid #cbd5e1; background: white; color: #334155; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* PESTAÑAS (Manual PDF style) */
+        .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #e2e8f0; border-radius: 6px; cursor: pointer; font-weight: 600; color: #64748b; }
+        .tab-btn.active { background: var(--workmate-blue); color: white; }
+
+        /* PISTOLEO / GARITA */
+        .garita-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .scanner-box { background: #0f172a; color: #4ade80; padding: 2rem; border-radius: 12px; text-align: center; font-family: monospace; }
+        .access-card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; display: none; text-align: center; }
+        .access-header { padding: 1.5rem; color: white; }
+        .acc-ok { background: var(--success); }
+        .acc-fail { background: var(--danger); }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-helmet-safety"></i> 
+            <div>SCMinero V6<br><span style="font-size:0.7rem; font-weight:400; opacity:0.7;">Gestión Integral</span></div>
+        </div>
+        
+        <div class="menu">
+            <div class="menu-category">Estratégico</div>
+            <a onclick="showView('dashboard')" class="menu-item active" id="btn-dashboard">
+                <i class="fa-solid fa-chart-line"></i> Semáforo Gerencial
+            </a>
+            <a onclick="showView('f30')" class="menu-item" id="btn-f30">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Cierre Mes (F30)
+            </a>
+
+            <div class="menu-category">Operación Faena</div>
+            <a onclick="showView('acceso')" class="menu-item" id="btn-acceso">
+                <i class="fa-solid fa-barcode"></i> Control Acceso (Garita)
+            </a>
+            <a onclick="showView('turnos')" class="menu-item" id="btn-turnos">
+                <i class="fa-solid fa-clock"></i> Turnos y Dotación
+            </a>
+            <a onclick="showView('autorizaciones')" class="menu-item" id="btn-autorizaciones">
+                <i class="fa-solid fa-envelope-open-text"></i> Autorizaciones
+            </a>
+
+            <div class="menu-category">Administración</div>
+            <a onclick="showView('contratos')" class="menu-item" id="btn-contratos">
+                <i class="fa-solid fa-file-contract"></i> Gestión Contratos
+            </a>
+            <a onclick="showView('documental')" class="menu-item" id="btn-documental">
+                <i class="fa-solid fa-folder-open"></i> Gestión Documental
+            </a>
+            <a onclick="showView('vehiculos')" class="menu-item" id="btn-vehiculos">
+                <i class="fa-solid fa-truck-pickup"></i> Vehículos
+            </a>
+            <a onclick="showView('config')" class="menu-item" id="btn-config">
+                <i class="fa-solid fa-gears"></i> Configuración
+            </a>
+        </div>
+    </div>
+
+    <div class="main">
+        
+        <div class="header">
+            <div>
+                <h2 style="color: var(--primary);">Bienvenido, Raúl Lavín</h2>
+                <p style="color: #64748b; font-size: 0.9rem;">Gerente RRHH | Perfil Administrador</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-outline"><i class="fa-solid fa-bell"></i> 5</button>
+                <button class="btn btn-primary"><i class="fa-solid fa-user"></i> Mi Perfil</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="view-section active">
+            <h3 style="margin-bottom:1rem; color:var(--secondary);">Estado General de la Operación</h3>
+            <div class="kpi-grid">
+                <div class="card">
+                    <div class="kpi-label">Dotación Real en Faena</div>
+                    <div class="kpi-value">1,245</div>
+                    <div style="color:var(--success); font-size:0.85rem;">▲ 98% Asistencia hoy</div>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">Empresas Bloqueadas</div>
+                    <div class="kpi-value" style="color:var(--danger);">3</div>
+                    <div style="color:var(--danger); font-size:0.85rem;">Por F30 / Deuda Prev.</div>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">Licencias Internas Vencidas</div>
+                    <div class="kpi-value" style="color:var(--accent);">12</div>
+                    <div style="font-size:0.85rem;">Requieren renovación</div>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">Estados de Pago Retenidos</div>
+                    <div class="kpi-value">2</div>
+                    <div style="font-size:0.85rem;">Validación pendiente</div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <div style="padding:1.5rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
+                    <h3>Semáforo de Contratistas (Top 5)</h3>
+                    <input type="text" placeholder="Buscar Empresa..." style="padding:8px; border:1px solid #ccc; border-radius:6px;">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Semáforo</th>
+                            <th>Empresa</th>
+                            <th>N° Contrato</th>
+                            <th>Dotación (Real/Pactada)</th>
+                            <th>% Documental</th>
+                            <th>Estado F30</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="status-badge bg-ok">● HABILITADO</span></td>
+                            <td><strong>SODEXO CHILE</strong></td>
+                            <td>4600014909</td>
+                            <td>398 / 400</td>
+                            <td>99%</td>
+                            <td><span class="status-badge bg-ok">AL DÍA</span></td>
+                            <td><button class="btn btn-outline" onclick="showView('contratos')">Ver</button></td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-badge bg-err">● BLOQUEADO</span></td>
+                            <td><strong>CONS. LOS ANDES</strong></td>
+                            <td>4501441526</td>
+                            <td>155 / 150 <i class="fa-solid fa-triangle-exclamation" style="color:red" title="Exceso Dotación"></i></td>
+                            <td>80%</td>
+                            <td><span class="status-badge bg-err">DEUDA</span></td>
+                            <td><button class="btn btn-red" onclick="showView('f30')">Gestionar</button></td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-badge bg-warn">● ALERTA</span></td>
+                            <td><strong>KOMATSU CUMMINS</strong></td>
+                            <td>460005589</td>
+                            <td>85 / 100 <small style="color:#b45309">(-15)</small></td>
+                            <td>92%</td>
+                            <td><span class="status-badge bg-warn">PENDIENTE</span></td>
+                            <td><button class="btn btn-outline" onclick="showView('contratos')">Ver</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="contratos" class="view-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="color:var(--primary);">Gestión de Acreditación Contratos</h3>
+                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nuevo Contrato</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filterContracts('propios')">Contratos Propios</button>
+                <button class="tab-btn" onclick="filterContracts('sub')">Subcontratos</button>
+                <button class="tab-btn" onclick="filterContracts('esporadicos')">Servicios Esporádicos</button>
+            </div>
+
+            <div id="list-contratos">
+                <div class="card" style="margin-bottom:1.5rem; border-left: 5px solid var(--workmate-blue);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:10px; border-bottom:1px solid #eee;">
+                        <div>
+                            <h3 style="color:var(--workmate-blue);">N° 4600014909 - SODEXO CHILE</h3>
+                            <span style="font-size:0.85rem; color:#64748b;">ADC Codelco: María Muñoz Tapia | Div: DGM</span>
+                        </div>
+                        <span class="status-badge bg-ok">ACREDITADO</span>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-bottom:1.5rem;">
+                        <div><small style="color:#64748b;">Inicio/Término</small><br><strong>15-07-2022 al 14-07-2025</strong></div>
+                        <div><small style="color:#64748b;">Dotación Personal</small><br><strong>Acreditada: 398</strong></div>
+                        <div><small style="color:#64748b;">Dotación Vehículos</small><br><strong>Acreditada: 12</strong></div>
+                        <div><small style="color:#64748b;">Estado F30</small><br><span style="color:green; font-weight:bold;">✓ Validado</span></div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button class="btn btn-blue"><i class="fa-solid fa-users"></i> Ver Personal</button>
+                        <button class="btn btn-blue"><i class="fa-solid fa-car"></i> Ver Vehículos</button>
+                        <button class="btn btn-outline" style="color:#eab308; border-color:#eab308;"><i class="fa-solid fa-pen"></i> Editar</button>
+                        <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);" onclick="alert('Manual 5.2.4: Se inhabilitará contrato y todas las credenciales asociadas.')"><i class="fa-solid fa-ban"></i> Inhabilitar Contrato</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:1.5rem; border-left: 5px solid var(--danger);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:10px; border-bottom:1px solid #eee;">
+                        <div>
+                            <h3 style="color:var(--primary);">N° 4501441526 - CONS. LOS ANDES</h3>
+                            <span style="font-size:0.85rem; color:#64748b;">ADC Codelco: Juan Pérez | Div: DMH</span>
+                        </div>
+                        <span class="status-badge bg-err">BLOQUEADO POR F30</span>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1rem; margin-bottom:1.5rem;">
+                        <div><small style="color:#64748b;">Inicio/Término</small><br><strong>01-01-2023 al 31-12-2024</strong></div>
+                        <div><small style="color:#64748b;">Dotación Personal</small><br><strong>Acreditada: 155</strong></div>
+                        <div><small style="color:#64748b;">Dotación Vehículos</small><br><strong>Acreditada: 45</strong></div>
+                        <div><small style="color:#64748b;">Estado F30</small><br><span style="color:red; font-weight:bold;">⚠ Deuda Previsional</span></div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button class="btn btn-blue"><i class="fa-solid fa-users"></i> Ver Personal</button>
+                        <button class="btn btn-red" onclick="showView('f30')"><i class="fa-solid fa-file-invoice-dollar"></i> Gestionar Deuda</button>
+                        <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);" onclick="alert('Manual 5.2.6: Finalizar contrato desvincula todo el personal.')"><i class="fa-solid fa-power-off"></i> Finalizar Contrato</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="acceso" class="view-section">
+            <div class="garita-container">
+                <div class="scanner-box">
+                    <i class="fa-solid fa-barcode" style="font-size:4rem; margin-bottom:1rem;"></i>
+                    <h2>SISTEMA DE ACCESO</h2>
+                    <p style="opacity:0.7;">Esperando lectura de Cédula o QR...</p>
+                    <input type="text" placeholder="RUN 12345678-9" style="background:transparent; border:2px dashed #4ade80; color:white; padding:10px; text-align:center; font-size:1.2rem; margin:20px 0; width:80%;">
+                    
+                    <div style="display:grid; gap:10px; margin-top:20px;">
+                        <button class="btn" style="background:#334155; color:white; justify-content:center;" onclick="simularPistoleo('ok')">[SIMULAR] ACCESO OK</button>
+                        <button class="btn" style="background:#334155; color:white; justify-content:center;" onclick="simularPistoleo('bloqueo')">[SIMULAR] BLOQUEO (Finiquito)</button>
+                        <button class="btn" style="background:#334155; color:white; justify-content:center;" onclick="simularPistoleo('sinpase')">[SIMULAR] SIN PASE CONDUCCIÓN</button>
+                    </div>
+                </div>
+
+                <div id="resultado-acceso">
+                    <div id="acc-ok" class="access-card">
+                        <div class="access-header acc-ok">
+                            <h1><i class="fa-solid fa-check-circle"></i> ACCESO AUTORIZADO</h1>
+                        </div>
+                        <div style="padding:2rem;">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" style="width:120px; border-radius:50%; border:4px solid white; box-shadow:0 2px 10px rgba(0,0,0,0.2); margin-top:-60px;">
+                            <h2 style="margin-top:10px;">VICTOR FLORES</h2>
+                            <p style="color:#64748b;">RUT: 15.432.123-K</p>
+                            <h3 style="margin-top:1rem; color:var(--primary);">SODEXO CHILE</h3>
+                            <div style="display:flex; justify-content:center; gap:10px; margin-top:1rem;">
+                                <span class="status-badge" style="background:#f1f5f9;">Turno 7x7 A</span>
+                                <span class="status-badge" style="background:#f1f5f9;">ODI Vigente</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="acc-fail" class="access-card">
+                        <div class="access-header acc-fail">
+                            <h1><i class="fa-solid fa-ban"></i> ACCESO DENEGADO</h1>
+                        </div>
+                        <div style="padding:2rem;">
+                            <img src="https://randomuser.me/api/portraits/men/45.jpg" style="width:120px; border-radius:50%; border:4px solid white; box-shadow:0 2px 10px rgba(0,0,0,0.2); margin-top:-60px; filter:grayscale(100%);">
+                            <h2 style="margin-top:10px;">JUAN PÉREZ</h2>
+                            <p style="color:#64748b;">RUT: 12.345.678-9</p>
+                            <h3 style="margin-top:1rem; color:var(--danger);">CONS. LOS ANDES</h3>
+                            
+                            <div style="margin-top:1.5rem; padding:1rem; background:#fee2e2; border-radius:8px; border:1px solid var(--danger); color:var(--danger);">
+                                <h3 style="margin:0;"><i class="fa-solid fa-file-contract"></i> MOTIVO: FINIQUITADO</h3>
+                                <p style="font-size:0.85rem;">Fecha Baja: 14/12/2024</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="f30" class="view-section">
+            <h3>Control de Obligaciones Laborales (F30)</h3>
+            <p style="margin-bottom:1.5rem; color:#64748b;">Validación para liberación de Estados de Pago Mensual.</p>
+
+            <div class="card" style="border-left: 5px solid var(--danger);">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>Constructora Los Andes - Agosto 2023</h3>
+                    <span class="status-badge bg-err">ESTADO PAGO BLOQUEADO</span>
+                </div>
+                <table style="margin-top:1.5rem;">
+                    <tr>
+                        <td><strong>Certificado F30-1 (Dirección del Trabajo)</strong><br><small>Antecedentes laborales y previsionales</small></td>
+                        <td style="color:green; font-weight:bold;">✓ VALIDADO</td>
+                        <td><button class="btn btn-outline btn-sm">Ver PDF</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Comprobantes de Pago Remuneraciones</strong><br><small>150 Trabajadores</small></td>
+                        <td style="color:green; font-weight:bold;">✓ VALIDADO</td>
+                        <td><button class="btn btn-outline btn-sm">Ver Carpeta</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pago Cotizaciones (Previred)</strong><br><small>Monto declarado vs. pagado</small></td>
+                        <td style="color:red; font-weight:bold;">⚠ DIFERENCIA DETECTADA</td>
+                        <td><button class="btn btn-red btn-sm">Ver Detalle Deuda</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="turnos" class="view-section">
+            <h3>Control de Turnos y Ausentismo</h3>
+            <div class="kpi-grid">
+                <div class="card" style="border-top:4px solid var(--workmate-blue);">
+                    <h4>TURNO A (En Faena)</h4>
+                    <p>Jornada 7x7 | 08:00 - 20:00</p>
+                    <div class="kpi-value">95%</div>
+                    <span class="status-badge bg-warn">Faltan 5 personas</span>
+                </div>
+                <div class="card" style="border-top:4px solid #94a3b8;">
+                    <h4>TURNO B (Descanso)</h4>
+                    <p>Bajada ayer</p>
+                    <div class="kpi-value" style="color:#94a3b8">100%</div>
+                    <span class="status-badge bg-ok">Completo</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="documental" class="view-section">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                <h3>Documentación Global de Trabajadores</h3>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" placeholder="Buscar RUT..." style="padding:5px 10px; border:1px solid #ccc; border-radius:4px;">
+                    <button class="btn btn-primary">Filtrar</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trabajador</th>
+                        <th>Empresa</th>
+                        <th>Contrato</th>
+                        <th>Examen Altura</th>
+                        <th>ODI</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Carlos Muñoz</td>
+                        <td>Los Andes</td>
+                        <td style="color:green">Vigente</td>
+                        <td style="color:green">Vigente</td>
+                        <td style="color:green">Vigente</td>
+                        <td><span class="status-badge bg-ok">AL DÍA</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ana Fernández</td>
+                        <td>Komatsu</td>
+                        <td style="color:green">Vigente</td>
+                        <td style="color:red">VENCIDO</td>
+                        <td style="color:green">Vigente</td>
+                        <td><span class="status-badge bg-err">INCOMPLETO</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="autorizaciones" class="view-section">
+            <h3>Buzón de Autorizaciones</h3>
+            <p>Integración con correo electrónico (Manual 5.2.7).</p>
+            <div class="card">
+                <h4>Solicitud #4023: Cambio de Turno</h4>
+                <p>Empresa: Servicios Técnicos SA | 3 Trabajadores</p>
+                <div style="margin-top:10px;">
+                    <button class="btn btn-blue">Aprobar</button>
+                    <button class="btn btn-outline">Rechazar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="vehiculos" class="view-section">
+            <h3>Gestión de Vehículos</h3>
+            <p>Manual Sección 7: Acreditación de Vehículos</p>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Patente</th><th>Tipo</th><th>Empresa</th><th>Rev. Técnica</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>GJ-YT-99</td><td>Camioneta 4x4</td><td>Sodexo</td><td>Vigente</td><td><span class="status-badge bg-ok">Habilitado</span></td></tr>
+                    <tr><td>LK-WW-22</td><td>Bus Transporte</td><td>Los Andes</td><td>Vencida</td><td><span class="status-badge bg-err">Bloqueado</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="config" class="view-section">
+            <h3>Configuración del Sistema</h3>
+            <div class="card">
+                <h4>Parámetros Generales</h4>
+                <p>Definición de documentos obligatorios por perfil (Manual 4.1).</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Función principal de navegación
+        function showView(viewId) {
+            // 1. Ocultar todas las secciones
+            const sections = document.querySelectorAll('.view-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+
+            // 2. Mostrar la sección seleccionada
+            const target = document.getElementById(viewId);
+            if (target) {
+                target.style.display = 'block';
+                setTimeout(() => target.classList.add('active'), 10); // Hack para asegurar renderizado
+            }
+
+            // 3. Actualizar menú lateral
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => item.classList.remove('active'));
+            
+            const activeBtn = document.getElementById('btn-' + viewId);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // Simulación de Pistoleo (Garita)
+        function simularPistoleo(tipo) {
+            // Ocultar resultados previos
+            document.querySelectorAll('.access-card').forEach(c => c.style.display = 'none');
+            
+            if (tipo === 'ok') {
+                document.getElementById('acc-ok').style.display = 'block';
+            } else if (tipo === 'bloqueo') {
+                document.getElementById('acc-fail').style.display = 'block';
+            } else if (tipo === 'sinpase') {
+                // Reutilizamos la tarjeta de fallo pero cambiamos texto
+                const failCard = document.getElementById('acc-fail');
+                failCard.querySelector('h3 i').className = 'fa-solid fa-id-card'; // Icono licencia
+                failCard.querySelector('h3').innerText = ' MOTIVO: SIN PASE INTERNO';
+                failCard.style.display = 'block';
+            }
+        }
+
+        // Filtro de Contratos (Visual)
+        function filterContracts(tipo) {
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            // Aquí iría la lógica real de filtrado, por ahora es visual
+        }
+
+        // Inicializar en Dashboard al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            showView('dashboard');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Contratista V2 - Cumplimiento Legal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #0d9488;
+            --brand-dark: #0f766e;
+            --brand-light: #ccfbf1;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text: #334155;
+            --text-muted: #64748b;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--bg); 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: var(--text);
+        }
+
+        /* SIDEBAR */
+        .sidebar { 
+            width: 270px; 
+            background: white; 
+            border-right: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+        }
+        
+        .logo { 
+            padding: 1.5rem; 
+            border-bottom: 1px solid var(--border);
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+        .logo-text h1 { font-size: 1rem; font-weight: 700; color: var(--brand-dark); }
+        .logo-text span { font-size: 0.7rem; color: var(--text-muted); }
+        
+        .empresa-badge {
+            margin: 1rem 1.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--brand-light);
+            border-radius: 10px;
+            border: 1px solid #99f6e4;
+        }
+        .empresa-badge small { color: var(--brand-dark); font-size: 0.7rem; text-transform: uppercase; font-weight: 600; }
+        .empresa-badge strong { display: block; color: var(--brand-dark); margin-top: 2px; }
+
+        .menu { flex: 1; padding: 0.5rem 0; overflow-y: auto; }
+        
+        .menu-section {
+            padding: 1rem 1.5rem 0.5rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .menu-item { 
+            padding: 0.85rem 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            color: var(--text-muted); 
+            transition: all 0.2s; 
+            text-decoration: none; 
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .menu-item i { width: 18px; text-align: center; }
+        .menu-item:hover { background: #f0fdfa; color: var(--brand-dark); }
+        .menu-item.active { 
+            background: #f0fdfa; 
+            color: var(--brand-dark); 
+            border-left-color: var(--brand);
+            font-weight: 600;
+        }
+        .menu-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .menu-item .badge.warning { background: var(--warning); }
+
+        /* MAIN */
+        .main { 
+            flex: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column;
+        }
+        
+        .topbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar h2 { font-size: 1.1rem; color: var(--text); font-weight: 600; }
+        .topbar p { font-size: 0.8rem; color: var(--text-muted); }
+
+        .content { padding: 2rem; flex: 1; }
+
+        /* VISTAS */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS */
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 { font-size: 1rem; font-weight: 600; }
+        .card-body { padding: 1.5rem; }
+
+        /* ALERT BANNERS */
+        .alert-banner {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .alert-banner i { font-size: 1.2rem; margin-top: 2px; }
+        .alert-banner.critical {
+            background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .alert-banner.warning {
+            background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+        .alert-banner .alert-content { flex: 1; }
+        .alert-banner strong { display: block; margin-bottom: 2px; }
+        .alert-banner small { opacity: 0.9; }
+
+        /* STATUS CARDS GRID */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .status-card.critical::before { background: var(--danger); }
+        .status-card.warning::before { background: var(--warning); }
+        .status-card.ok::before { background: var(--success); }
+        .status-card.neutral::before { background: #94a3b8; }
+        
+        .status-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .status-value { font-size: 2rem; font-weight: 700; margin: 6px 0; font-family: 'JetBrains Mono', monospace; }
+        .status-card.critical .status-value { color: var(--danger); }
+        .status-card.warning .status-value { color: var(--warning); }
+        .status-card.ok .status-value { color: var(--success); }
+        .status-detail { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            text-align: left; 
+            padding: 0.875rem 1rem; 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            color: var(--text-muted); 
+            background: #f8fafc;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+        td { 
+            padding: 0.875rem 1rem; 
+            border-bottom: 1px solid var(--border); 
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+        tr:hover { background: #fafafa; }
+
+        /* BADGES */
+        .badge { 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline-flex; 
+            align-items: center; 
+            gap: 4px;
+        }
+        .badge-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-success { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-neutral { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+        /* BUTTONS */
+        .btn { 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-brand { background: var(--brand); color: white; }
+        .btn-brand:hover { background: var(--brand-dark); transform: translateY(-1px); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: #f8fafc; }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+        /* ACTION CARDS */
+        .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .action-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-card:hover { 
+            border-color: var(--brand); 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .action-icon { 
+            width: 56px; 
+            height: 56px; 
+            background: #f0fdfa;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--brand);
+        }
+        .action-card h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .action-card p { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* WIZARD */
+        .wizard-steps { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 2rem; 
+            position: relative; 
+            padding: 0 2rem;
+        }
+        .wizard-steps::before { 
+            content: ''; 
+            position: absolute; 
+            top: 18px; 
+            left: 3rem; 
+            right: 3rem; 
+            height: 2px; 
+            background: #e2e8f0;
+        }
+        .step { 
+            position: relative; 
+            z-index: 1; 
+            background: white; 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 50%; 
+            border: 2px solid #e2e8f0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 700; 
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        .step.active { border-color: var(--brand); background: var(--brand); color: white; }
+        .step.completed { border-color: var(--success); background: var(--success); color: white; }
+        .step-label { 
+            position: absolute; 
+            top: 42px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            font-size: 0.7rem; 
+            white-space: nowrap; 
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* FORMS */
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        .required { color: var(--danger); }
+
+        /* DOCUMENT STATUS ROW */
+        .doc-row {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            gap: 1rem;
+        }
+        .doc-row:last-child { border-bottom: none; }
+        .doc-row.critical { background: #fef2f2; }
+        .doc-row.warning { background: #fffbeb; }
+        .doc-icon {
+            width: 40px;
+            height: 40px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+        .doc-row.critical .doc-icon { background: #fee2e2; color: var(--danger); }
+        .doc-row.warning .doc-icon { background: #fef3c7; color: var(--warning); }
+        .doc-info { flex: 1; }
+        .doc-info h4 { font-size: 0.9rem; margin-bottom: 2px; }
+        .doc-info span { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* COMPLIANCE METER */
+        .compliance-meter {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .meter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .meter-bar {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        .meter-fill.ok { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+        .meter-fill.warning { background: linear-gradient(90deg, #fbbf24 0%, #d97706 100%); }
+        .meter-fill.danger { background: linear-gradient(90deg, #f87171 0%, #dc2626 100%); }
+
+        /* CONTRACT CARD */
+        .contract-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .contract-header {
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .contract-body { padding: 1.5rem; }
+        .contract-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+        .contract-field label { display: block; font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; font-weight: 600; }
+        .contract-field span { font-size: 0.9rem; font-weight: 500; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: #f1f5f9; padding: 4px; border-radius: 10px; width: fit-content; }
+        .tab-btn { 
+            padding: 10px 20px; 
+            border: none; 
+            background: transparent;
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { background: white; color: var(--brand-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* URGENCY LIST */
+        .urgency-list { margin-bottom: 2rem; }
+        .urgency-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+        }
+        .urgency-item.critical { border-left: 4px solid var(--danger); background: #fef2f2; }
+        .urgency-item.warning { border-left: 4px solid var(--warning); background: #fffbeb; }
+        .urgency-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .urgency-item.critical .urgency-icon { background: #fee2e2; color: var(--danger); }
+        .urgency-item.warning .urgency-icon { background: #fef3c7; color: var(--warning); }
+        .urgency-info { flex: 1; }
+        .urgency-info h4 { font-size: 0.9rem; margin-bottom: 2px; }
+        .urgency-info span { font-size: 0.8rem; color: var(--text-muted); }
+        .urgency-time { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.85rem; }
+        .urgency-item.critical .urgency-time { color: var(--danger); }
+        .urgency-item.warning .urgency-time { color: var(--warning); }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-hard-hat"></i></div>
+        <div class="logo-text">
+            <h1>Portal Contratista</h1>
+            <span>Sistema de Cumplimiento</span>
+        </div>
+    </div>
+    
+    <div class="empresa-badge">
+        <small>Empresa</small>
+        <strong>CONSTRUCTORA LOS ANDES</strong>
+    </div>
+    
+    <div class="menu">
+        <div class="menu-section">Mi Estado</div>
+        <a onclick="showView('dashboard')" class="menu-item active" id="btn-dashboard">
+            <i class="fa-solid fa-gauge-high"></i>
+            Estado de Cumplimiento
+            <span class="badge">3</span>
+        </a>
+        <a onclick="showView('urgentes')" class="menu-item" id="btn-urgentes">
+            <i class="fa-solid fa-fire"></i>
+            Acciones Urgentes
+            <span class="badge">5</span>
+        </a>
+
+        <div class="menu-section">Acreditación</div>
+        <a onclick="showView('contratos')" class="menu-item" id="btn-contratos">
+            <i class="fa-solid fa-file-contract"></i>
+            Mis Contratos
+        </a>
+        <a onclick="showView('personal')" class="menu-item" id="btn-personal">
+            <i class="fa-solid fa-users"></i>
+            Acreditar Personal
+            <span class="badge warning">2</span>
+        </a>
+        <a onclick="showView('vehiculos')" class="menu-item" id="btn-vehiculos">
+            <i class="fa-solid fa-truck"></i>
+            Acreditar Vehículos
+        </a>
+
+        <div class="menu-section">Obligaciones</div>
+        <a onclick="showView('f30')" class="menu-item" id="btn-f30">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            Carga F30 Mensual
+            <span class="badge">!</span>
+        </a>
+        <a onclick="showView('historial')" class="menu-item" id="btn-historial">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Mi Historial
+        </a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <div>
+            <h2>Panel de Cumplimiento Legal</h2>
+            <p>Contrato Principal: 4501441526</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-outline">
+                <i class="fa-solid fa-bell"></i>
+            </button>
+            <button class="btn btn-brand">
+                <i class="fa-solid fa-user"></i> Usuario Contratista
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ========== DASHBOARD ========== -->
+        <div id="dashboard" class="view-section active">
+            
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-gavel"></i>
+                <div class="alert-content">
+                    <strong>ESTADO DE PAGO BLOQUEADO - Deuda Previsional</strong>
+                    <small>Diferencia de $4.500.000 en cotizaciones AFP. Regularice para liberar el Estado de Pago #47.</small>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="showView('f30')">Regularizar Ahora</button>
+            </div>
+
+            <!-- Medidor de Cumplimiento -->
+            <div class="compliance-meter">
+                <div class="meter-header">
+                    <div>
+                        <h3 style="margin-bottom: 4px;">Índice de Cumplimiento General</h3>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Actualizado hace 2 horas</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 2rem; font-weight: 700; color: var(--danger); font-family: 'JetBrains Mono';">68%</span>
+                        <span style="display: block; font-size: 0.8rem; color: var(--danger);">Riesgo de bloqueo</span>
+                    </div>
+                </div>
+                <div class="meter-bar">
+                    <div class="meter-fill danger" style="width: 68%;"></div>
+                </div>
+            </div>
+
+            <div class="status-grid">
+                <div class="status-card critical">
+                    <div class="status-label">Documentos Vencidos</div>
+                    <div class="status-value">12</div>
+                    <div class="status-detail">Trabajadores afectados</div>
+                </div>
+                <div class="status-card critical">
+                    <div class="status-label">F30 Pendiente</div>
+                    <div class="status-value">1</div>
+                    <div class="status-detail">Estado de pago retenido</div>
+                </div>
+                <div class="status-card warning">
+                    <div class="status-label">Por Vencer (7 días)</div>
+                    <div class="status-value">8</div>
+                    <div class="status-detail">Requieren renovación</div>
+                </div>
+                <div class="status-card ok">
+                    <div class="status-label">Trabajadores OK</div>
+                    <div class="status-value">135</div>
+                    <div class="status-detail">100% documentados</div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 1rem; color: var(--text);">Acciones Rápidas</h3>
+            <div class="actions-grid">
+                <div class="action-card" onclick="showView('personal')">
+                    <div class="action-icon"><i class="fa-solid fa-user-plus"></i></div>
+                    <h4>Acreditar Personal</h4>
+                    <p>Nuevo ingreso o renovación</p>
+                </div>
+                <div class="action-card" onclick="showView('f30')">
+                    <div class="action-icon" style="background: #fef2f2; color: var(--danger);"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <h4>Subir F30</h4>
+                    <p style="color: var(--danger); font-weight: 600;">Pendiente - Urgente</p>
+                </div>
+                <div class="action-card" onclick="showView('vehiculos')">
+                    <div class="action-icon"><i class="fa-solid fa-truck-pickup"></i></div>
+                    <h4>Acreditar Vehículo</h4>
+                    <p>Pases y documentos</p>
+                </div>
+                <div class="action-card" onclick="showView('urgentes')">
+                    <div class="action-icon" style="background: #fffbeb; color: var(--warning);"><i class="fa-solid fa-fire"></i></div>
+                    <h4>Ver Urgentes</h4>
+                    <p>5 acciones pendientes</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Solicitudes Recientes</h3>
+                    <button class="btn btn-outline btn-sm">Ver Todas</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Sujeto</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">#18902</td>
+                            <td>Personal</td>
+                            <td>Juan Pérez Díaz</td>
+                            <td>Hoy 10:00</td>
+                            <td><span class="badge badge-warning"><i class="fa-solid fa-clock"></i> En Revisión</span></td>
+                            <td style="color: var(--text-muted); font-size: 0.8rem;">Pendiente validación ODI</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">#18855</td>
+                            <td>Vehículo</td>
+                            <td>Patente GJ-YT-99</td>
+                            <td>Ayer</td>
+                            <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Aprobado</span></td>
+                            <td style="color: var(--text-muted); font-size: 0.8rem;">-</td>
+                        </tr>
+                        <tr style="background: #fef2f2;">
+                            <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">#18801</td>
+                            <td>Personal</td>
+                            <td>María López S.</td>
+                            <td>12/12/2024</td>
+                            <td><span class="badge badge-danger"><i class="fa-solid fa-times"></i> Rechazado</span></td>
+                            <td style="color: var(--danger); font-size: 0.8rem; font-weight: 600;">Examen altura no corresponde a faena</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== ACCIONES URGENTES ========== -->
+        <div id="urgentes" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="color: var(--danger); margin-bottom: 4px;"><i class="fa-solid fa-fire" style="margin-right: 8px;"></i>Acciones Urgentes</h2>
+                    <p style="color: var(--text-muted);">Estas acciones pueden resultar en bloqueo de trabajadores o retención de pagos</p>
+                </div>
+            </div>
+
+            <div class="urgency-list">
+                <div class="urgency-item critical">
+                    <div class="urgency-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <div class="urgency-info">
+                        <h4>Regularizar deuda previsional</h4>
+                        <span>Diferencia de $4.500.000 en cotizaciones AFP - Estado de Pago #47 bloqueado</span>
+                    </div>
+                    <div class="urgency-time">INMEDIATO</div>
+                    <button class="btn btn-danger btn-sm" onclick="showView('f30')">Resolver</button>
+                </div>
+
+                <div class="urgency-item critical">
+                    <div class="urgency-icon"><i class="fa-solid fa-user-xmark"></i></div>
+                    <div class="urgency-info">
+                        <h4>5 trabajadores con examen de altura vencido</h4>
+                        <span>Activos en faena - Riesgo de bloqueo en próximas 24 horas</span>
+                    </div>
+                    <div class="urgency-time">24 hrs</div>
+                    <button class="btn btn-danger btn-sm">Subir Exámenes</button>
+                </div>
+
+                <div class="urgency-item critical">
+                    <div class="urgency-icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
+                    <div class="urgency-info">
+                        <h4>Contrato de trabajo rechazado - María López</h4>
+                        <span>Formato incorrecto. Trabajadora no puede ingresar a faena.</span>
+                    </div>
+                    <div class="urgency-time">48 hrs</div>
+                    <button class="btn btn-danger btn-sm">Resubir</button>
+                </div>
+
+                <div class="urgency-item warning">
+                    <div class="urgency-icon"><i class="fa-solid fa-id-card"></i></div>
+                    <div class="urgency-info">
+                        <h4>3 licencias de conducir por vencer</h4>
+                        <span>Vencen en menos de 7 días - Conductores quedarán inhabilitados</span>
+                    </div>
+                    <div class="urgency-time">7 días</div>
+                    <button class="btn btn-outline btn-sm">Ver Lista</button>
+                </div>
+
+                <div class="urgency-item warning">
+                    <div class="urgency-icon"><i class="fa-solid fa-file-signature"></i></div>
+                    <div class="urgency-info">
+                        <h4>8 ODI por renovar</h4>
+                        <span>Vencen en menos de 15 días</span>
+                    </div>
+                    <div class="urgency-time">15 días</div>
+                    <button class="btn btn-outline btn-sm">Ver Lista</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== MIS CONTRATOS ========== -->
+        <div id="contratos" class="view-section">
+            <h2 style="margin-bottom: 1.5rem;">Mis Contratos</h2>
+
+            <div class="contract-card" style="border-left: 4px solid var(--danger);">
+                <div class="contract-header">
+                    <div>
+                        <strong style="font-size: 1.1rem;">CONTRATO N° 4501441526</strong>
+                        <span style="margin-left: 10px;" class="badge badge-danger">OBSERVADO</span>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Servicio Obras Civiles</span>
+                </div>
+                <div class="contract-body">
+                    <div class="contract-grid">
+                        <div class="contract-field">
+                            <label>Inicio</label>
+                            <span>01-01-2023</span>
+                        </div>
+                        <div class="contract-field">
+                            <label>Término</label>
+                            <span>31-12-2024</span>
+                        </div>
+                        <div class="contract-field">
+                            <label>Dotación</label>
+                            <span style="color: var(--danger); font-weight: 600;">155 / 150 (+5 exceso)</span>
+                        </div>
+                        <div class="contract-field">
+                            <label>Estado F30</label>
+                            <span style="color: var(--danger); font-weight: 600;">⚠️ Deuda</span>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <button class="btn btn-outline" onclick="showView('personal')">
+                            <i class="fa-solid fa-users"></i> Ver Personal
+                        </button>
+                        <button class="btn btn-outline" onclick="showView('vehiculos')">
+                            <i class="fa-solid fa-truck"></i> Ver Vehículos
+                        </button>
+                        <button class="btn btn-danger" onclick="showView('f30')">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> Regularizar F30
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ACREDITAR PERSONAL ========== -->
+        <div id="personal" class="view-section">
+            <h2 style="margin-bottom: 1.5rem;">Acreditación de Personal</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active">Nueva Solicitud</button>
+                <button class="tab-btn">Pendientes (2)</button>
+                <button class="tab-btn">Rechazadas (1)</button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="wizard-steps">
+                        <div class="step active">1<span class="step-label">Datos Personales</span></div>
+                        <div class="step">2<span class="step-label">Contrato</span></div>
+                        <div class="step">3<span class="step-label">Licencias</span></div>
+                        <div class="step">4<span class="step-label">Documentos</span></div>
+                        <div class="step">5<span class="step-label">Confirmar</span></div>
+                    </div>
+
+                    <h3 style="margin-bottom: 1rem; color: var(--brand-dark);">1. Información Personal</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">RUT <span class="required">*</span></label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" class="form-input" placeholder="12.345.678-9">
+                                <button class="btn btn-brand">Buscar</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombres <span class="required">*</span></label>
+                            <input type="text" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellidos <span class="required">*</span></label>
+                            <input type="text" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nacionalidad</label>
+                            <select class="form-select"><option>Chilena</option><option>Extranjero</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fecha Nacimiento</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-input" placeholder="+56 9 1234 5678">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button class="btn btn-outline">Guardar Borrador</button>
+                        <button class="btn btn-brand">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== VEHICULOS ========== -->
+        <div id="vehiculos" class="view-section">
+            <h2 style="margin-bottom: 1.5rem;">Acreditación de Vehículos</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group" style="max-width: 400px;">
+                        <label class="form-label">Ingrese Patente a Acreditar</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" class="form-input" placeholder="AB-CD-12" style="text-transform: uppercase; font-family: 'JetBrains Mono';">
+                            <button class="btn btn-brand">Buscar</button>
+                        </div>
+                        <small style="color: var(--text-muted); margin-top: 8px; display: block;">Si la patente no existe, se habilitará el formulario de nuevo registro.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Mis Vehículos Acreditados</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patente</th>
+                            <th>Tipo</th>
+                            <th>Rev. Técnica</th>
+                            <th>Seguro</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-family: 'JetBrains Mono'; font-weight: 600;">GJ-YT-99</td>
+                            <td>Camioneta 4x4</td>
+                            <td><span class="badge badge-success">Vigente</span></td>
+                            <td><span class="badge badge-success">Vigente</span></td>
+                            <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Habilitado</span></td>
+                        </tr>
+                        <tr style="background: #fef2f2;">
+                            <td style="font-family: 'JetBrains Mono'; font-weight: 600;">LK-WW-22</td>
+                            <td>Bus Transporte</td>
+                            <td><span class="badge badge-danger">Vencida</span></td>
+                            <td><span class="badge badge-success">Vigente</span></td>
+                            <td><span class="badge badge-danger"><i class="fa-solid fa-ban"></i> Bloqueado</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== F30 ========== -->
+        <div id="f30" class="view-section">
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-hand"></i>
+                <div class="alert-content">
+                    <strong>ESTADO DE PAGO BLOQUEADO</strong>
+                    <small>Complete todos los documentos requeridos para liberar el Estado de Pago #47</small>
+                </div>
+            </div>
+
+            <h2 style="margin-bottom: 1.5rem;">Carga Mensual de Obligaciones (F30)</h2>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Periodo: Diciembre 2024</h3>
+                        <span style="color: var(--danger); font-size: 0.85rem;">Faltan documentos para liberación</span>
+                    </div>
+                    <button class="btn btn-brand" disabled style="opacity: 0.5;">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar a Revisión
+                    </button>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="doc-row">
+                        <div class="doc-icon"><i class="fa-solid fa-file-circle-check"></i></div>
+                        <div class="doc-info">
+                            <h4>Certificado F30-1 (Dirección del Trabajo)</h4>
+                            <span>Antecedentes laborales y previsionales</span>
+                        </div>
+                        <span class="badge badge-success"><i class="fa-solid fa-check"></i> Cargado</span>
+                        <button class="btn btn-outline btn-sm">Ver</button>
+                    </div>
+                    
+                    <div class="doc-row critical">
+                        <div class="doc-icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
+                        <div class="doc-info">
+                            <h4>Comprobante Pago Remuneraciones</h4>
+                            <span>155 Trabajadores - Debe subir liquidaciones</span>
+                        </div>
+                        <span class="badge badge-danger"><i class="fa-solid fa-times"></i> Pendiente</span>
+                        <button class="btn btn-danger btn-sm">Subir</button>
+                    </div>
+                    
+                    <div class="doc-row critical">
+                        <div class="doc-icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
+                        <div class="doc-info">
+                            <h4>Pago Cotizaciones (Previred)</h4>
+                            <span style="color: var(--danger); font-weight: 600;">Diferencia detectada: $4.500.000</span>
+                        </div>
+                        <span class="badge badge-danger"><i class="fa-solid fa-times"></i> Con Observación</span>
+                        <button class="btn btn-danger btn-sm">Regularizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HISTORIAL ========== -->
+        <div id="historial" class="view-section">
+            <h2 style="margin-bottom: 1.5rem;">Mi Historial de Cumplimiento</h2>
+            
+            <div class="alert-banner warning">
+                <i class="fa-solid fa-chart-line"></i>
+                <div class="alert-content">
+                    <strong>Tendencia Negativa</strong>
+                    <small>Su índice de cumplimiento ha bajado 15% en los últimos 3 meses. Esto puede afectar futuras licitaciones.</small>
+                </div>
+            </div>
+
+            <div class="status-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="status-card warning">
+                    <div class="status-label">Incumplimientos (6 meses)</div>
+                    <div class="status-value">7</div>
+                    <div class="status-detail">Ranking: Riesgo Alto</div>
+                </div>
+                <div class="status-card neutral">
+                    <div class="status-label">Promedio Cumplimiento</div>
+                    <div class="status-value" style="color: var(--text);">72%</div>
+                    <div class="status-detail">Últimos 6 meses</div>
+                </div>
+                <div class="status-card ok">
+                    <div class="status-label">Estados Pago Liberados</div>
+                    <div class="status-value">11</div>
+                    <div class="status-detail">De 12 periodos</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Eventos Registrados</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Evento</th>
+                            <th>Impacto</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>15/12/2024</td>
+                            <td>Deuda previsional detectada</td>
+                            <td><span class="badge badge-danger">Crítico</span></td>
+                            <td style="color: var(--danger);">Pendiente</td>
+                        </tr>
+                        <tr>
+                            <td>10/12/2024</td>
+                            <td>Trabajador sin ODI ingresó a faena</td>
+                            <td><span class="badge badge-danger">Crítico</span></td>
+                            <td style="color: var(--warning);">Regularizado</td>
+                        </tr>
+                        <tr>
+                            <td>01/12/2024</td>
+                            <td>Exceso de jornada - 8 trabajadores</td>
+                            <td><span class="badge badge-warning">Medio</span></td>
+                            <td style="color: var(--success);">Resuelto</td>
+                        </tr>
+                        <tr>
+                            <td>20/11/2024</td>
+                            <td>F30-1 vencido por 5 días</td>
+                            <td><span class="badge badge-warning">Medio</span></td>
+                            <td style="color: var(--success);">Resuelto</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function showView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.getElementById(viewId).classList.add('active');
+        
+        document.querySelectorAll('.menu-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        const btn = document.getElementById('btn-' + viewId);
+        if (btn) btn.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        showView('dashboard');
+    });
+</script>
+
+</body>
+</html>

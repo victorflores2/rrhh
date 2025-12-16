@@ -1,0 +1,2671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCMinero V2 - Sistema de Protección Legal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0c1929;
+            --secondary: #1a2d45;
+            --accent: #d97706;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --text: #334155;
+            --text-muted: #64748b;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: #f1f5f9; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: var(--text);
+        }
+
+        /* SIDEBAR */
+        .sidebar { 
+            width: 290px; 
+            background: linear-gradient(180deg, var(--primary) 0%, #0a1628 100%);
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+        
+        .logo { 
+            padding: 1.5rem; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent) 0%, #b45309 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .logo-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo-text span { font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .menu { flex: 1; padding: 1rem 0; overflow-y: auto; }
+        
+        .menu-section {
+            padding: 1rem 1.5rem 0.5rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .menu-item { 
+            padding: 0.85rem 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            color: rgba(255,255,255,0.7); 
+            transition: all 0.2s; 
+            text-decoration: none; 
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .menu-item i { width: 20px; text-align: center; }
+        .menu-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-item.active { 
+            background: rgba(217, 119, 6, 0.15); 
+            color: white; 
+            border-left-color: var(--accent);
+        }
+        .menu-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* MAIN AREA */
+        .main { 
+            flex: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column;
+        }
+        
+        .topbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-left h2 { font-size: 1.1rem; color: var(--primary); font-weight: 600; }
+        .topbar-left p { font-size: 0.8rem; color: var(--text-muted); }
+        .topbar-right { display: flex; gap: 10px; align-items: center; }
+
+        .content { padding: 2rem; flex: 1; }
+
+        /* VIEW SECTIONS */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 { font-size: 1rem; font-weight: 600; color: var(--primary); }
+        .card-body { padding: 1.5rem; }
+
+        /* KPI GRID - RIESGO */
+        .risk-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .risk-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .risk-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .risk-card.critical::before { background: var(--danger); }
+        .risk-card.warning::before { background: var(--warning); }
+        .risk-card.ok::before { background: var(--success); }
+        .risk-card.neutral::before { background: #94a3b8; }
+        
+        .risk-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .risk-value { font-size: 2.5rem; font-weight: 700; margin: 8px 0; font-family: 'JetBrains Mono', monospace; }
+        .risk-card.critical .risk-value { color: var(--danger); }
+        .risk-card.warning .risk-value { color: var(--warning); }
+        .risk-card.ok .risk-value { color: var(--success); }
+        .risk-detail { font-size: 0.8rem; color: var(--text-muted); }
+        .risk-action { 
+            margin-top: 1rem; 
+            padding-top: 1rem; 
+            border-top: 1px solid var(--border);
+        }
+
+        /* ALERT BANNER */
+        .alert-banner {
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .alert-banner.critical {
+            background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .alert-banner.warning {
+            background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+        .alert-banner i { font-size: 1.2rem; }
+        .alert-banner .alert-content { flex: 1; }
+        .alert-banner strong { display: block; margin-bottom: 2px; }
+        .alert-banner small { opacity: 0.8; }
+
+        /* TABLES */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            text-align: left; 
+            padding: 1rem 1.25rem; 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            color: var(--text-muted); 
+            background: #f8fafc;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+        td { 
+            padding: 1rem 1.25rem; 
+            border-bottom: 1px solid var(--border); 
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+        tr:hover { background: #f8fafc; }
+
+        /* BADGES */
+        .badge { 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline-flex; 
+            align-items: center; 
+            gap: 5px;
+        }
+        .badge-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-success { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-neutral { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+        /* RISK LEVEL INDICATOR */
+        .risk-level {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .risk-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .risk-dot.critical { background: var(--danger); }
+        .risk-dot.warning { background: var(--warning); }
+        .risk-dot.ok { background: var(--success); }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* BUTTONS */
+        .btn { 
+            padding: 8px 16px; 
+            border-radius: 8px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1a2d45; transform: translateY(-1px); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+        .btn-icon { padding: 8px; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: #f1f5f9; padding: 4px; border-radius: 10px; width: fit-content; }
+        .tab-btn { 
+            padding: 10px 20px; 
+            border: none; 
+            background: transparent;
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* SEMAFORO MOVIL */
+        .semaforo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1000px;
+        }
+        .scanner-panel {
+            background: var(--primary);
+            border-radius: 16px;
+            padding: 2rem;
+            color: white;
+            text-align: center;
+        }
+        .scanner-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #4ade80;
+        }
+        .scanner-input {
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            color: white;
+            padding: 1rem;
+            width: 100%;
+            text-align: center;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .scanner-input::placeholder { color: rgba(255,255,255,0.5); }
+
+        /* RESULTADO SEMAFORO */
+        .resultado-panel { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .semaforo-result {
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            text-align: center;
+            animation: scaleIn 0.3s ease;
+        }
+        .semaforo-result.show { display: block; }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .semaforo-header {
+            padding: 3rem 2rem;
+            color: white;
+        }
+        .semaforo-header.verde { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .semaforo-header.rojo { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+        .semaforo-header.amarillo { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+        
+        .semaforo-header i { font-size: 4rem; margin-bottom: 1rem; }
+        .semaforo-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: 2px; }
+        
+        .semaforo-body {
+            background: white;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+        }
+        .semaforo-foto {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: -60px auto 1rem;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            object-fit: cover;
+        }
+        .motivo-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: left;
+        }
+        .motivo-box.danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        .motivo-box.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+
+        /* HISTORIAL TIMELINE */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--danger);
+        }
+        .timeline-item.warning::before { background: var(--warning); box-shadow: 0 0 0 2px var(--warning); }
+        .timeline-item.ok::before { background: var(--success); box-shadow: 0 0 0 2px var(--success); }
+        .timeline-date { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        .timeline-content { font-size: 0.9rem; }
+
+        /* AUTORIZACION FORMAL */
+        .autorizacion-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        .autorizacion-header {
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .autorizacion-body {
+            padding: 1.5rem;
+        }
+        .autorizacion-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .autorizacion-field label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .autorizacion-field span {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .fundamento-legal {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .fundamento-legal i { color: #0284c7; margin-right: 8px; }
+        .autorizacion-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .autorizacion-actions .btn { flex: 1; justify-content: center; }
+
+        /* FORM */
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        .required { color: var(--danger); }
+
+        /* CONFIG GRID */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        .config-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .config-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .config-card h4 i { color: var(--accent); }
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .config-item:last-child { border-bottom: none; }
+        .config-item label { font-size: 0.85rem; color: var(--text); }
+        .config-value { 
+            font-weight: 600; 
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        /* INFORME LEGAL */
+        .informe-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a5f 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .informe-header h2 { font-size: 1.3rem; }
+        .informe-header .fecha { opacity: 0.8; font-size: 0.85rem; }
+        .informe-body {
+            background: white;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 2rem;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .ranking-position {
+            width: 36px;
+            height: 36px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .ranking-item:nth-child(2) .ranking-position { background: #ea580c; }
+        .ranking-item:nth-child(3) .ranking-position { background: #f59e0b; }
+        .ranking-info { flex: 1; }
+        .ranking-info h4 { font-size: 0.95rem; margin-bottom: 2px; }
+        .ranking-info span { font-size: 0.8rem; color: var(--text-muted); }
+        .ranking-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        /* ESTADO DOCUMENTAL DURO */
+        .doc-status-grid { display: grid; gap: 0.75rem; }
+        .doc-status-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .doc-status-row.critical { background: #fef2f2; border-left: 3px solid var(--danger); }
+        .doc-status-row.warning { background: #fffbeb; border-left: 3px solid var(--warning); }
+        .doc-chain {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .doc-chain i { font-size: 0.6rem; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { font-size: 1.1rem; color: var(--primary); }
+        .modal-body { padding: 1.5rem; max-height: 60vh; overflow-y: auto; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* SIMULACION BUTTONS */
+        .sim-buttons {
+            display: grid;
+            gap: 8px;
+            margin-top: 1.5rem;
+        }
+        .sim-btn {
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .sim-btn:hover { background: rgba(255,255,255,0.2); }
+        /* EMPRESA TABS */
+        .empresa-tab { display: none; }
+        .empresa-tab.active { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="logo-text">
+            <h1>SCMinero</h1>
+            <span>Protección Legal</span>
+        </div>
+    </div>
+    
+    <div class="menu">
+        <div class="menu-section">Vista Principal</div>
+        <a onclick="showView('empresas')" class="menu-item active" id="btn-empresas">
+            <i class="fa-solid fa-building"></i> 
+            Empresas Contratistas
+        </a>
+        <a onclick="showView('dashboard')" class="menu-item" id="btn-dashboard">
+            <i class="fa-solid fa-triangle-exclamation"></i> 
+            Mapa de Riesgo
+            <span class="badge">3</span>
+        </a>
+
+        <div class="menu-section">Seguimiento</div>
+        <a onclick="showView('incumplimientos')" class="menu-item" id="btn-incumplimientos">
+            <i class="fa-solid fa-file-circle-xmark"></i> 
+            Incumplimientos
+            <span class="badge">7</span>
+        </a>
+        <a onclick="showView('alertas')" class="menu-item" id="btn-alertas">
+            <i class="fa-solid fa-bell-slash"></i> 
+            Alertas Ignoradas
+            <span class="badge">12</span>
+        </a>
+
+        <div class="menu-section">Control Faena</div>
+        <a onclick="showView('acceso')" class="menu-item" id="btn-acceso">
+            <i class="fa-solid fa-traffic-light"></i> 
+            Semáforo Acceso
+        </a>
+        <a onclick="showView('turnos')" class="menu-item" id="btn-turnos">
+            <i class="fa-solid fa-clock"></i> 
+            Turnos / Fiscalización
+        </a>
+        <a onclick="showView('autorizaciones')" class="menu-item" id="btn-autorizaciones">
+            <i class="fa-solid fa-stamp"></i> 
+            Autorizaciones
+        </a>
+
+        <div class="menu-section">Administración</div>
+        <a onclick="showView('documental')" class="menu-item" id="btn-documental">
+            <i class="fa-solid fa-folder-open"></i> 
+            Cumplimiento Documental
+        </a>
+        <a onclick="showView('f30')" class="menu-item" id="btn-f30">
+            <i class="fa-solid fa-file-invoice-dollar"></i> 
+            Control F30
+        </a>
+
+        <div class="menu-section">Reportes</div>
+        <a onclick="showView('reportes')" class="menu-item" id="btn-reportes">
+            <i class="fa-solid fa-chart-bar"></i> 
+            Central de Reportes
+        </a>
+        <a onclick="showView('config')" class="menu-item" id="btn-config">
+            <i class="fa-solid fa-sliders"></i> 
+            Configuración
+        </a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-left">
+            <h2>Sistema de Protección Legal</h2>
+            <p>Faena: Parque Eólico Atacama III</p>
+        </div>
+        <div class="topbar-right">
+            <button class="btn btn-outline btn-icon" title="Notificaciones">
+                <i class="fa-solid fa-bell"></i>
+            </button>
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-user"></i> Raúl Lavín
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ========== EMPRESAS CONTRATISTAS (VISTA PRINCIPAL) ========== -->
+        <div id="empresas" class="view-section active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="color: var(--primary); margin-bottom: 4px;">Empresas Contratistas</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Vista general de todas las empresas subcontratistas y su estado de cumplimiento</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-outline">
+                        <i class="fa-solid fa-download"></i> Exportar Excel
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fa-solid fa-plus"></i> Nueva Empresa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros tipo Excel -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-body" style="padding: 1rem 1.5rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Buscar:</label>
+                            <input type="text" placeholder="RUT, Nombre, Contrato..." style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; width: 200px;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Estado:</label>
+                            <select style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+                                <option>Todos</option>
+                                <option>Habilitado</option>
+                                <option>Alerta</option>
+                                <option>Bloqueado</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Faena:</label>
+                            <select style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+                                <option>Todas</option>
+                                <option>Faena Principal</option>
+                                <option>Faena Norte</option>
+                                <option>Faena Sur</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fa-solid fa-filter"></i> Más Filtros
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fa-solid fa-rotate"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Principal tipo Excel -->
+            <div class="card">
+                <div class="card-header" style="background: #f8fafc;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Mostrando <strong>27</strong> empresas</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline btn-sm"><i class="fa-solid fa-columns"></i> Columnas</button>
+                        <button class="btn btn-outline btn-sm"><i class="fa-solid fa-sort"></i> Ordenar</button>
+                    </div>
+                </div>
+                <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+                    <table style="font-size: 0.85rem;">
+                        <thead style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="width: 50px;"><input type="checkbox"></th>
+                                <th style="width: 80px;">Riesgo</th>
+                                <th>Empresa</th>
+                                <th>RUT</th>
+                                <th>N° Contrato</th>
+                                <th style="text-align: center;">Dotación</th>
+                                <th style="text-align: center;">% Docs</th>
+                                <th style="text-align: center;">F30</th>
+                                <th style="text-align: center;">Turnos</th>
+                                <th>Vencimiento</th>
+                                <th style="width: 100px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Empresa CRÍTICA -->
+                            <tr style="background: #fef2f2; cursor: pointer;" onclick="showEmpresaDetalle('losandes')">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot critical"></span>
+                                        <span style="font-weight: 600; color: var(--danger);">87</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>CONSTRUCTORA LOS ANDES</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: Juan Pérez</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">76.543.210-K</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">4501441526</td>
+                                <td style="text-align: center;">
+                                    <span style="color: var(--danger); font-weight: 600;">155/150</span>
+                                    <div style="font-size: 0.7rem; color: var(--danger);">+5 exceso</div>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-danger">68%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-danger">DEUDA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-danger">5 alertas</span></td>
+                                <td>31/12/2024</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); showEmpresaDetalle('losandes')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Empresa CRÍTICA 2 -->
+                            <tr style="background: #fef2f2; cursor: pointer;" onclick="showEmpresaDetalle('servicios')">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot critical"></span>
+                                        <span style="font-weight: 600; color: var(--danger);">72</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>SERVICIOS MINEROS SpA</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: María Soto</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">77.890.123-4</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">4600089012</td>
+                                <td style="text-align: center;">
+                                    <span>89/90</span>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-warning">75%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-danger">PEND.</span></td>
+                                <td style="text-align: center;"><span class="badge badge-warning">2 alertas</span></td>
+                                <td>30/06/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); showEmpresaDetalle('servicios')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Empresa WARNING -->
+                            <tr style="background: #fffbeb; cursor: pointer;" onclick="showEmpresaDetalle('komatsu')">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot warning"></span>
+                                        <span style="font-weight: 600; color: var(--warning);">45</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>KOMATSU CUMMINS</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: Carlos Ruiz</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">96.543.210-5</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">460005589</td>
+                                <td style="text-align: center;">
+                                    <span>85/100</span>
+                                    <div style="font-size: 0.7rem; color: var(--warning);">-15 dotación</div>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-warning">92%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-warning">OBS.</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>31/12/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); showEmpresaDetalle('komatsu')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Empresa OK -->
+                            <tr style="cursor: pointer;" onclick="showEmpresaDetalle('sodexo')">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot ok"></span>
+                                        <span style="font-weight: 600; color: var(--success);">12</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>SODEXO CHILE</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: María Muñoz</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">96.123.456-7</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">4600014909</td>
+                                <td style="text-align: center;">
+                                    <span style="color: var(--success);">398/400</span>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-success">99%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">AL DÍA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>14/07/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); showEmpresaDetalle('sodexo')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Empresa OK 2 -->
+                            <tr style="cursor: pointer;" onclick="showEmpresaDetalle('transportes')">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot ok"></span>
+                                        <span style="font-weight: 600; color: var(--success);">8</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>TRANSPORTES DEL NORTE</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: Pedro Soto</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">78.901.234-5</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">4600078901</td>
+                                <td style="text-align: center;">
+                                    <span style="color: var(--success);">45/50</span>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-success">100%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">AL DÍA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>30/06/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); showEmpresaDetalle('transportes')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Empresa OK 3 -->
+                            <tr style="cursor: pointer;">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot ok"></span>
+                                        <span style="font-weight: 600; color: var(--success);">15</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>MONTAJES INDUSTRIALES</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: Ana Torres</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">79.012.345-6</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">4600079012</td>
+                                <td style="text-align: center;">
+                                    <span>120/120</span>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-success">98%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">AL DÍA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>31/03/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Más empresas... -->
+                            <tr style="cursor: pointer;">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot ok"></span>
+                                        <span style="font-weight: 600; color: var(--success);">10</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>SEGURIDAD INTEGRAL</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ADC: Luis Vera</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">80.123.456-7</td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">4600080123</td>
+                                <td style="text-align: center;">
+                                    <span>30/30</span>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-success">100%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">AL DÍA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>31/12/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Resumen al pie -->
+            <div style="display: flex; gap: 2rem; margin-top: 1.5rem; padding: 1rem; background: white; border-radius: 10px; border: 1px solid var(--border);">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">27</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Total Empresas</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--danger);">3</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Bloqueadas</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);">4</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">En Alerta</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">20</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Al Día</div>
+                </div>
+                <div style="text-align: center; margin-left: auto;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">1,247</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Trabajadores Totales</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== DETALLE EMPRESA ========== -->
+        <div id="empresa-detalle" class="view-section">
+            <a class="back-link" onclick="showView('empresas')" style="display: inline-flex; align-items: center; gap: 8px; color: var(--primary); text-decoration: none; font-weight: 500; margin-bottom: 1.5rem; cursor: pointer;">
+                <i class="fa-solid fa-arrow-left"></i> Volver a Empresas Contratistas
+            </a>
+
+            <!-- Header Empresa -->
+            <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--danger);">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <h2 style="color: var(--primary); margin: 0;" id="empresa-nombre">CONSTRUCTORA LOS ANDES</h2>
+                                <span class="badge badge-danger">ALTO RIESGO</span>
+                            </div>
+                            <p style="color: var(--text-muted); margin-bottom: 1rem;">RUT: 76.543.210-K | Contrato: 4501441526 | ADC: Juan Pérez</p>
+                            <div style="display: flex; gap: 2rem;">
+                                <div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Vigencia</span>
+                                    <div style="font-weight: 600;">01/01/2023 - 31/12/2024</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Dotación</span>
+                                    <div style="font-weight: 600; color: var(--danger);">155 / 150 (+5 exceso)</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">Vehículos</span>
+                                    <div style="font-weight: 600;">45 acreditados</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem 2rem; background: #fef2f2; border-radius: 12px;">
+                            <div style="font-size: 0.75rem; color: var(--danger); font-weight: 600;">ÍNDICE DE RIESGO</div>
+                            <div style="font-size: 3rem; font-weight: 700; color: var(--danger); font-family: 'JetBrains Mono';">87</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">de 100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs de navegación -->
+            <div class="tabs" style="margin-bottom: 1.5rem;">
+                <button class="tab-btn active" onclick="showEmpresaTab('resumen')">Resumen</button>
+                <button class="tab-btn" onclick="showEmpresaTab('trabajadores')">Trabajadores (155)</button>
+                <button class="tab-btn" onclick="showEmpresaTab('documentos')">Documentos</button>
+                <button class="tab-btn" onclick="showEmpresaTab('f30-empresa')">F30 / Pagos</button>
+                <button class="tab-btn" onclick="showEmpresaTab('historial-empresa')">Historial</button>
+            </div>
+
+            <!-- Tab: Resumen -->
+            <div id="tab-resumen" class="empresa-tab active">
+                <!-- Alertas Activas -->
+                <div class="alert-banner critical" style="margin-bottom: 1.5rem;">
+                    <i class="fa-solid fa-gavel"></i>
+                    <div class="alert-content">
+                        <strong>ESTADO DE PAGO BLOQUEADO</strong>
+                        <small>Deuda previsional de $4.500.000 detectada. Estado de Pago #47 retenido hasta regularización.</small>
+                    </div>
+                    <button class="btn btn-danger btn-sm">Gestionar Deuda</button>
+                </div>
+
+                <!-- KPIs -->
+                <div class="risk-grid" style="margin-bottom: 1.5rem;">
+                    <div class="risk-card critical">
+                        <div class="risk-label">Cumplimiento Documental</div>
+                        <div class="risk-value">68%</div>
+                        <div class="risk-detail">47 trabajadores con docs vencidos</div>
+                    </div>
+                    <div class="risk-card critical">
+                        <div class="risk-label">Estado F30</div>
+                        <div class="risk-value" style="font-size: 1.5rem;">DEUDA</div>
+                        <div class="risk-detail">$4.500.000 pendiente</div>
+                    </div>
+                    <div class="risk-card critical">
+                        <div class="risk-label">Alertas Turnos</div>
+                        <div class="risk-value">5</div>
+                        <div class="risk-detail">Exceso jornada no autorizado</div>
+                    </div>
+                    <div class="risk-card warning">
+                        <div class="risk-label">Incumplimientos (6m)</div>
+                        <div class="risk-value">7</div>
+                        <div class="risk-detail">Eventos registrados</div>
+                    </div>
+                </div>
+
+                <!-- Incumplimientos Recientes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--danger); margin-right: 8px;"></i> Últimos Incumplimientos</h3>
+                        <button class="btn btn-outline btn-sm">Ver Historial Completo</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-date">15 Dic 2024, 09:32</div>
+                                <div class="timeline-content">
+                                    <strong>Deuda Previsional Detectada</strong>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem;">Diferencia de $4.500.000 en cotizaciones AFP.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-date">10 Dic 2024, 14:15</div>
+                                <div class="timeline-content">
+                                    <strong>Trabajador sin ODI ingresó a faena</strong>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem;">Juan Pérez (12.345.678-9) accedió sin Obligación de Informar vigente.</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item warning">
+                                <div class="timeline-date">01 Dic 2024, 11:00</div>
+                                <div class="timeline-content">
+                                    <strong>Exceso de jornada no autorizado</strong>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem;">8 trabajadores excedieron límite legal (45 hrs semanales).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Trabajadores -->
+            <div id="tab-trabajadores" class="empresa-tab" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Trabajadores de la Empresa (155)</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" placeholder="Buscar por RUT o nombre..." style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; width: 250px;">
+                            <select style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+                                <option>Todos</option>
+                                <option>Con documentos vencidos</option>
+                                <option>Con exceso de jornada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Trabajador</th>
+                                    <th>RUT</th>
+                                    <th>Cargo</th>
+                                    <th>% Docs</th>
+                                    <th>Turno</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: #fef2f2;">
+                                    <td><strong>Juan Pérez Díaz</strong></td>
+                                    <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">12.345.678-9</td>
+                                    <td>Maestro Primera</td>
+                                    <td><span class="badge badge-danger">60%</span></td>
+                                    <td>7x7 A</td>
+                                    <td><span class="badge badge-danger">3 docs vencidos</span></td>
+                                    <td><button class="btn btn-outline btn-sm">Ver</button></td>
+                                </tr>
+                                <tr style="background: #fef2f2;">
+                                    <td><strong>Pedro González M.</strong></td>
+                                    <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">15.234.567-8</td>
+                                    <td>Operador</td>
+                                    <td><span class="badge badge-warning">85%</span></td>
+                                    <td>7x7 A</td>
+                                    <td><span class="badge badge-danger">Exceso jornada</span></td>
+                                    <td><button class="btn btn-outline btn-sm">Ver</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>María López S.</strong></td>
+                                    <td style="font-family: 'JetBrains Mono'; font-size: 0.8rem;">16.543.210-5</td>
+                                    <td>Administrativa</td>
+                                    <td><span class="badge badge-success">100%</span></td>
+                                    <td>5x2</td>
+                                    <td><span class="badge badge-success">Al día</span></td>
+                                    <td><button class="btn btn-outline btn-sm">Ver</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Documentos -->
+            <div id="tab-documentos" class="empresa-tab" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Estado Documental</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="doc-status-grid">
+                            <div class="doc-status-row critical">
+                                <div>
+                                    <strong>Exámenes de Altura Física</strong>
+                                    <div class="doc-chain">
+                                        <span>12 trabajadores con examen vencido</span>
+                                    </div>
+                                </div>
+                                <span class="badge badge-danger">VENCIDOS</span>
+                                <span class="badge badge-danger">ACTIVOS EN FAENA</span>
+                                <button class="btn btn-danger btn-sm">Bloquear Acceso</button>
+                            </div>
+                            <div class="doc-status-row critical">
+                                <div>
+                                    <strong>ODI (Obligación de Informar)</strong>
+                                    <div class="doc-chain">
+                                        <span>8 trabajadores sin ODI vigente</span>
+                                    </div>
+                                </div>
+                                <span class="badge badge-danger">VENCIDOS</span>
+                                <span class="badge badge-warning">5 ingresaron hoy</span>
+                                <button class="btn btn-outline btn-sm">Notificar</button>
+                            </div>
+                            <div class="doc-status-row warning">
+                                <div>
+                                    <strong>Contratos de Trabajo</strong>
+                                    <div class="doc-chain">
+                                        <span>3 contratos por vencer en 7 días</span>
+                                    </div>
+                                </div>
+                                <span class="badge badge-warning">POR VENCER</span>
+                                <span class="badge badge-neutral">7 días</span>
+                                <button class="btn btn-outline btn-sm">Ver Lista</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: F30 -->
+            <div id="tab-f30-empresa" class="empresa-tab" style="display: none;">
+                <div class="card" style="border-left: 4px solid var(--danger);">
+                    <div class="card-header">
+                        <div>
+                            <h3>Control F30 - Diciembre 2024</h3>
+                            <span style="color: var(--danger); font-size: 0.85rem;">Estado de Pago #47 BLOQUEADO</span>
+                        </div>
+                        <span class="badge badge-danger">DEUDA PREVISIONAL</span>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <tr>
+                                <td style="width: 50%;">
+                                    <strong>Certificado F30-1 (Dirección del Trabajo)</strong><br>
+                                    <small style="color: var(--text-muted);">Antecedentes laborales y previsionales</small>
+                                </td>
+                                <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Validado</span></td>
+                                <td><button class="btn btn-outline btn-sm">Ver PDF</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Comprobantes de Pago Remuneraciones</strong><br>
+                                    <small style="color: var(--text-muted);">155 Trabajadores</small>
+                                </td>
+                                <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Validado</span></td>
+                                <td><button class="btn btn-outline btn-sm">Ver Carpeta</button></td>
+                            </tr>
+                            <tr style="background: #fef2f2;">
+                                <td>
+                                    <strong>Pago Cotizaciones (Previred)</strong><br>
+                                    <small style="color: var(--danger);">⚠️ Diferencia: $4.500.000</small>
+                                </td>
+                                <td><span class="badge badge-danger"><i class="fa-solid fa-times"></i> Rechazado</span></td>
+                                <td><button class="btn btn-danger btn-sm">Ver Detalle Deuda</button></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Historial -->
+            <div id="tab-historial-empresa" class="empresa-tab" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Historial Completo de Incumplimientos</h3>
+                        <button class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Exportar PDF</button>
+                    </div>
+                    <div class="card-body">
+                        <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                            Historial detallado de todos los eventos registrados para esta empresa...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== DASHBOARD: MAPA DE RIESGO ========== -->
+        <div id="dashboard" class="view-section">
+            
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-gavel"></i>
+                <div class="alert-content">
+                    <strong>EXPOSICIÓN LEGAL ALTA - 3 Empresas Bloqueadas</strong>
+                    <small>Responsabilidad subsidiaria activa. Se recomienda retención de estados de pago hasta regularización.</small>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="showView('incumplimientos')">Ver Detalle</button>
+            </div>
+
+            <div class="risk-grid">
+                <div class="risk-card critical">
+                    <div class="risk-label">Empresas Bloqueadas</div>
+                    <div class="risk-value">3</div>
+                    <div class="risk-detail">Deuda previsional / F30 pendiente</div>
+                    <div class="risk-action">
+                        <button class="btn btn-danger btn-sm" onclick="showView('f30')">
+                            <i class="fa-solid fa-arrow-right"></i> Gestionar
+                        </button>
+                    </div>
+                </div>
+                <div class="risk-card critical">
+                    <div class="risk-label">Trabajadores en Riesgo</div>
+                    <div class="risk-value">47</div>
+                    <div class="risk-detail">Doc. vencido pero activos en faena</div>
+                    <div class="risk-action">
+                        <button class="btn btn-danger btn-sm" onclick="showView('documental')">
+                            <i class="fa-solid fa-arrow-right"></i> Revisar
+                        </button>
+                    </div>
+                </div>
+                <div class="risk-card warning">
+                    <div class="risk-label">Alertas sin Atender</div>
+                    <div class="risk-value">12</div>
+                    <div class="risk-detail">Más de 48 horas sin respuesta</div>
+                    <div class="risk-action">
+                        <button class="btn btn-warning btn-sm" onclick="showView('alertas')">
+                            <i class="fa-solid fa-arrow-right"></i> Atender
+                        </button>
+                    </div>
+                </div>
+                <div class="risk-card ok">
+                    <div class="risk-label">Empresas al Día</div>
+                    <div class="risk-value">24</div>
+                    <div class="risk-detail">Sin observaciones</div>
+                    <div class="risk-action">
+                        <span class="badge badge-success"><i class="fa-solid fa-check"></i> Cumpliendo</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-ranking-star" style="color: var(--danger); margin-right: 8px;"></i> Ranking de Exposición Legal por Empresa</h3>
+                    <button class="btn btn-outline btn-sm">
+                        <i class="fa-solid fa-download"></i> Exportar PDF
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">Riesgo</th>
+                                <th>Empresa</th>
+                                <th>N° Contrato</th>
+                                <th>Índice Exposición</th>
+                                <th>Incumplimientos (6m)</th>
+                                <th>Estado F30</th>
+                                <th>Decisión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot critical"></span>
+                                    </div>
+                                </td>
+                                <td><strong>CONSTRUCTORA LOS ANDES</strong></td>
+                                <td>4501441526</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--danger);">87/100</span></td>
+                                <td><span class="badge badge-danger">7 eventos</span></td>
+                                <td><span class="badge badge-danger">DEUDA</span></td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="openModal('bloqueo')">
+                                        <i class="fa-solid fa-ban"></i> Bloquear
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot critical"></span>
+                                    </div>
+                                </td>
+                                <td><strong>SERVICIOS MINEROS SpA</strong></td>
+                                <td>4600089012</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--danger);">72/100</span></td>
+                                <td><span class="badge badge-danger">5 eventos</span></td>
+                                <td><span class="badge badge-danger">PENDIENTE</span></td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Advertir
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot warning"></span>
+                                    </div>
+                                </td>
+                                <td><strong>KOMATSU CUMMINS</strong></td>
+                                <td>460005589</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--warning);">45/100</span></td>
+                                <td><span class="badge badge-warning">2 eventos</span></td>
+                                <td><span class="badge badge-warning">OBSERVADO</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm" onclick="showView('contratos')">
+                                        <i class="fa-solid fa-eye"></i> Revisar
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="risk-level">
+                                        <span class="risk-dot ok"></span>
+                                    </div>
+                                </td>
+                                <td><strong>SODEXO CHILE</strong></td>
+                                <td>4600014909</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--success);">12/100</span></td>
+                                <td><span class="badge badge-success">0 eventos</span></td>
+                                <td><span class="badge badge-success">AL DÍA</span></td>
+                                <td>
+                                    <span class="badge badge-success"><i class="fa-solid fa-check"></i> OK</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== INCUMPLIMIENTOS ========== -->
+        <div id="incumplimientos" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="color: var(--primary); margin-bottom: 4px;">Registro de Incumplimientos</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Historial de eventos que generan responsabilidad legal</p>
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-download"></i> Descargar Evidencia
+                </button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active">Últimos 30 días</button>
+                <button class="tab-btn">Últimos 6 meses</button>
+                <button class="tab-btn">Histórico</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Constructora Los Andes - Historial de Incumplimientos</h3>
+                    <span class="badge badge-danger">ALTO RIESGO</span>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">15 Dic 2024, 09:32</div>
+                            <div class="timeline-content">
+                                <strong>Deuda Previsional Detectada</strong>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Diferencia de $4.500.000 en cotizaciones AFP. Estado de Pago #47 retenido.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">10 Dic 2024, 14:15</div>
+                            <div class="timeline-content">
+                                <strong>Trabajador sin ODI ingresó a faena</strong>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Juan Pérez (12.345.678-9) accedió sin Obligación de Informar vigente. Supervisor: Carlos Muñoz.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item warning">
+                            <div class="timeline-date">01 Dic 2024, 11:00</div>
+                            <div class="timeline-content">
+                                <strong>Exceso de jornada no autorizado</strong>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">8 trabajadores excedieron límite legal (45 hrs semanales). No hay registro de autorización.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">20 Nov 2024, 16:45</div>
+                            <div class="timeline-content">
+                                <strong>Certificado F30-1 vencido</strong>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Operaron 5 días sin certificado vigente de la Dirección del Trabajo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ALERTAS IGNORADAS ========== -->
+        <div id="alertas" class="view-section">
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-bell-slash"></i>
+                <div class="alert-content">
+                    <strong>12 alertas sin atención en más de 48 horas</strong>
+                    <small>El registro de alertas ignoradas puede ser utilizado en fiscalizaciones como evidencia de negligencia.</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Alertas Pendientes de Atención</h3>
+                    <div>
+                        <button class="btn btn-danger btn-sm">Atender Todas</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Prioridad</th>
+                                <th>Alerta</th>
+                                <th>Empresa</th>
+                                <th>Generada</th>
+                                <th>Sin atención</th>
+                                <th>Responsable</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fef2f2;">
+                                <td><span class="badge badge-danger">CRÍTICA</span></td>
+                                <td>Deuda previsional detectada en Previred</td>
+                                <td>Constructora Los Andes</td>
+                                <td>13/12/2024 08:00</td>
+                                <td style="color: var(--danger); font-weight: 700;">72 horas</td>
+                                <td>Sin asignar</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm">Atender</button>
+                                </td>
+                            </tr>
+                            <tr style="background: #fef2f2;">
+                                <td><span class="badge badge-danger">CRÍTICA</span></td>
+                                <td>Examen de altura física vencido - 3 trabajadores activos</td>
+                                <td>Komatsu Cummins</td>
+                                <td>14/12/2024 10:30</td>
+                                <td style="color: var(--danger); font-weight: 700;">52 horas</td>
+                                <td>Sin asignar</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm">Atender</button>
+                                </td>
+                            </tr>
+                            <tr style="background: #fffbeb;">
+                                <td><span class="badge badge-warning">MEDIA</span></td>
+                                <td>Licencia de conducir por vencer en 5 días</td>
+                                <td>Sodexo Chile</td>
+                                <td>14/12/2024 14:00</td>
+                                <td style="color: var(--warning); font-weight: 700;">48 horas</td>
+                                <td>María Muñoz</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm">Atender</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SEMAFORO ACCESO ========== -->
+        <div id="acceso" class="view-section">
+            <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Control de Acceso - Vista Garita</h2>
+            
+            <div class="semaforo-container">
+                <div class="scanner-panel">
+                    <div class="scanner-icon">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <h3>LECTOR DE ACCESO</h3>
+                    <p style="opacity: 0.7; margin-top: 8px;">Esperando lectura de cédula o código QR...</p>
+                    
+                    <input type="text" class="scanner-input" placeholder="RUN: 12.345.678-9">
+                    
+                    <div class="sim-buttons">
+                        <button class="sim-btn" onclick="simularAcceso('verde')">
+                            <i class="fa-solid fa-circle-check"></i> Simular: ACCESO OK
+                        </button>
+                        <button class="sim-btn" onclick="simularAcceso('rojo')">
+                            <i class="fa-solid fa-ban"></i> Simular: BLOQUEADO (Finiquito)
+                        </button>
+                        <button class="sim-btn" onclick="simularAcceso('amarillo')">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Simular: BAJO RESPONSABILIDAD
+                        </button>
+                    </div>
+                </div>
+
+                <div class="resultado-panel">
+                    <!-- VERDE -->
+                    <div id="result-verde" class="semaforo-result">
+                        <div class="semaforo-header verde">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <h1>ENTRA</h1>
+                        </div>
+                        <div class="semaforo-body">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="semaforo-foto">
+                            <h2>VÍCTOR FLORES SILVA</h2>
+                            <p style="color: var(--text-muted);">RUT: 15.432.123-K</p>
+                            <h3 style="margin-top: 1rem; color: var(--primary);">SODEXO CHILE</h3>
+                            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 1rem;">
+                                <span class="badge badge-success">Turno 7x7 A</span>
+                                <span class="badge badge-success">100% Docs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROJO -->
+                    <div id="result-rojo" class="semaforo-result">
+                        <div class="semaforo-header rojo">
+                            <i class="fa-solid fa-ban"></i>
+                            <h1>NO ENTRA</h1>
+                        </div>
+                        <div class="semaforo-body">
+                            <img src="https://randomuser.me/api/portraits/men/45.jpg" class="semaforo-foto" style="filter: grayscale(100%);">
+                            <h2>JUAN PÉREZ DÍAZ</h2>
+                            <p style="color: var(--text-muted);">RUT: 12.345.678-9</p>
+                            <h3 style="margin-top: 1rem; color: var(--danger);">CONS. LOS ANDES</h3>
+                            
+                            <div class="motivo-box danger">
+                                <strong><i class="fa-solid fa-file-circle-xmark"></i> MOTIVO: FINIQUITADO</strong>
+                                <p style="font-size: 0.85rem; margin-top: 4px;">Fecha de baja: 14/12/2024</p>
+                                <p style="font-size: 0.85rem;">Registrado por: Sistema automático</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AMARILLO -->
+                    <div id="result-amarillo" class="semaforo-result">
+                        <div class="semaforo-header amarillo">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h1>BAJO RESPONSABILIDAD</h1>
+                        </div>
+                        <div class="semaforo-body">
+                            <img src="https://randomuser.me/api/portraits/women/28.jpg" class="semaforo-foto">
+                            <h2>ANA FERNÁNDEZ ROJAS</h2>
+                            <p style="color: var(--text-muted);">RUT: 18.765.432-1</p>
+                            <h3 style="margin-top: 1rem; color: var(--warning);">KOMATSU CUMMINS</h3>
+                            
+                            <div class="motivo-box warning">
+                                <strong><i class="fa-solid fa-file-medical"></i> MOTIVO: EXAMEN ALTURA VENCIDO</strong>
+                                <p style="font-size: 0.85rem; margin-top: 4px;">Vencido hace: 3 días</p>
+                                <p style="font-size: 0.85rem; font-weight: 700; margin-top: 8px;">⚠️ Requiere autorización de supervisor para ingreso</p>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                                <button class="btn btn-warning" style="flex:1;" onclick="openModal('autorizacion')">
+                                    <i class="fa-solid fa-stamp"></i> Autorizar Ingreso
+                                </button>
+                                <button class="btn btn-outline" style="flex:1;">
+                                    <i class="fa-solid fa-ban"></i> Denegar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TURNOS / FISCALIZACIÓN ========== -->
+        <div id="turnos" class="view-section">
+            <div class="alert-banner warning">
+                <i class="fa-solid fa-user-clock"></i>
+                <div class="alert-content">
+                    <strong>5 trabajadores con exceso de jornada NO AUTORIZADO</strong>
+                    <small>Esto constituye infracción al Art. 22 del Código del Trabajo. Se recomienda acción inmediata.</small>
+                </div>
+            </div>
+
+            <div class="risk-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="risk-card ok">
+                    <div class="risk-label">Cumplimiento Turnos</div>
+                    <div class="risk-value">96%</div>
+                    <div class="risk-detail">Jornada legal cumplida</div>
+                </div>
+                <div class="risk-card warning">
+                    <div class="risk-label">Exceso Autorizado</div>
+                    <div class="risk-value">12</div>
+                    <div class="risk-detail">Con respaldo legal</div>
+                </div>
+                <div class="risk-card critical">
+                    <div class="risk-label">Exceso NO Autorizado</div>
+                    <div class="risk-value">5</div>
+                    <div class="risk-detail">🔴 Riesgo de multa</div>
+                </div>
+                <div class="risk-card neutral">
+                    <div class="risk-label">Hrs. Promedio Semanal</div>
+                    <div class="risk-value" style="color: var(--text);">44</div>
+                    <div class="risk-detail">Límite legal: 45 hrs</div>
+                </div>
+            </div>
+
+            <!-- Calendario de Turnos -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-calendar-week" style="color: var(--accent); margin-right: 8px;"></i> Calendario de Turnos - Semana Actual</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+                            <option>Pedro González M. - 15.234.567-8</option>
+                            <option>María López S. - 12.345.678-9</option>
+                            <option>Juan Pérez D. - 18.765.432-1</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.75rem; margin-bottom: 1rem;">
+                        <div style="background: #ecfdf5; border: 2px solid #10b981; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #059669; margin-bottom: 4px;">LUN 16/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">10h</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">07:00 - 18:00</div>
+                        </div>
+                        <div style="background: #ecfdf5; border: 2px solid #10b981; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #059669; margin-bottom: 4px;">MAR 17/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">10h</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">07:00 - 18:00</div>
+                        </div>
+                        <div style="background: #ecfdf5; border: 2px solid #10b981; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #059669; margin-bottom: 4px;">MIÉ 18/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">10h</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">07:00 - 18:00</div>
+                        </div>
+                        <div style="background: #ecfdf5; border: 2px solid #10b981; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #059669; margin-bottom: 4px;">JUE 19/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">10h</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">07:00 - 18:00</div>
+                        </div>
+                        <div style="background: #ecfdf5; border: 2px solid #10b981; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #059669; margin-bottom: 4px;">VIE 20/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">10h</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">07:00 - 18:00</div>
+                        </div>
+                        <div style="background: #fef2f2; border: 2px solid #dc2626; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #dc2626; margin-bottom: 4px;">SÁB 21/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #dc2626;">6h</div>
+                            <div style="font-size: 0.75rem; color: #dc2626;">⚠️ EXCESO</div>
+                        </div>
+                        <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; text-align: center;">
+                            <div style="font-weight: 700; font-size: 0.8rem; color: #64748b; margin-bottom: 4px;">DOM 22/12</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #94a3b8;">-</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Descanso</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+                        <div>
+                            <span class="badge badge-danger" style="font-size: 0.85rem; padding: 6px 12px;">
+                                ⚠️ Total: 56 horas semanales (excede límite legal de 45 horas)
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-ban"></i> Bloquear Trabajador
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="openModal('autorizacion')">
+                                <i class="fa-solid fa-stamp"></i> Autorizar Excepción
+                            </button>
+                            <button class="btn btn-outline btn-sm">
+                                <i class="fa-solid fa-arrow-up"></i> Escalar a Gerencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cumplimiento por Empresa -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3>Cumplimiento de Turnos por Empresa</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Trabajadores</th>
+                                <th>Cumplimiento</th>
+                                <th>Alertas Activas</th>
+                                <th>Hrs. Promedio</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sodexo Chile</strong></td>
+                                <td>398</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--success);">99%</span></td>
+                                <td><span class="badge badge-success">0</span></td>
+                                <td>43 hrs</td>
+                                <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> OK</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Komatsu Cummins</strong></td>
+                                <td>85</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--warning);">94%</span></td>
+                                <td><span class="badge badge-warning">2</span></td>
+                                <td>44 hrs</td>
+                                <td><span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation"></i> Alerta</span></td>
+                            </tr>
+                            <tr style="background: #fef2f2;">
+                                <td><strong>Constructora Los Andes</strong></td>
+                                <td>155</td>
+                                <td><span style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--danger);">87%</span></td>
+                                <td><span class="badge badge-danger">5</span></td>
+                                <td>48 hrs</td>
+                                <td><span class="badge badge-danger"><i class="fa-solid fa-ban"></i> Crítico</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Lista de Trabajadores con Exceso -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Trabajadores con Exceso de Jornada</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-danger btn-sm">
+                            <i class="fa-solid fa-ban"></i> Bloquear Seleccionados
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fa-solid fa-arrow-up"></i> Escalar a Gerencia
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Trabajador</th>
+                                <th>Empresa</th>
+                                <th>Hrs. Semanales</th>
+                                <th>Exceso</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fef2f2;">
+                                <td><input type="checkbox"></td>
+                                <td><strong>Pedro González M.</strong><br><small style="color: var(--text-muted);">15.234.567-8</small></td>
+                                <td>Cons. Los Andes</td>
+                                <td style="font-family: 'JetBrains Mono'; font-weight: 700;">56 hrs</td>
+                                <td><span class="badge badge-danger">+11 hrs</span></td>
+                                <td><span class="badge badge-danger">NO AUTORIZADO</span></td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm">Bloquear</button>
+                                    <button class="btn btn-outline btn-sm" onclick="openModal('autorizacion')">Autorizar</button>
+                                </td>
+                            </tr>
+                            <tr style="background: #fef2f2;">
+                                <td><input type="checkbox"></td>
+                                <td><strong>Carlos Muñoz R.</strong><br><small style="color: var(--text-muted);">16.543.210-5</small></td>
+                                <td>Cons. Los Andes</td>
+                                <td style="font-family: 'JetBrains Mono'; font-weight: 700;">52 hrs</td>
+                                <td><span class="badge badge-danger">+7 hrs</span></td>
+                                <td><span class="badge badge-danger">NO AUTORIZADO</span></td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm">Bloquear</button>
+                                    <button class="btn btn-outline btn-sm" onclick="openModal('autorizacion')">Autorizar</button>
+                                </td>
+                            </tr>
+                            <tr style="background: #fffbeb;">
+                                <td><input type="checkbox"></td>
+                                <td><strong>María López S.</strong><br><small style="color: var(--text-muted);">12.345.678-9</small></td>
+                                <td>Komatsu Cummins</td>
+                                <td style="font-family: 'JetBrains Mono'; font-weight: 700;">48 hrs</td>
+                                <td><span class="badge badge-warning">+3 hrs</span></td>
+                                <td><span class="badge badge-success">AUTORIZADO</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Ver Autorización</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== REPORTES ========== -->
+        <div id="reportes" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="color: var(--primary); margin-bottom: 4px;">Central de Reportes</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Dashboard ejecutivo y generación de informes consolidados</p>
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> Nuevo Reporte
+                </button>
+            </div>
+
+            <!-- Dashboard Ejecutivo -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-chart-pie" style="color: var(--accent); margin-right: 8px;"></i> Dashboard Ejecutivo</h3>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Actualizado: hace 2 horas</span>
+                </div>
+                <div class="card-body">
+                    <div class="risk-grid">
+                        <div class="risk-card neutral">
+                            <div class="risk-label">Total Trabajadores</div>
+                            <div class="risk-value" style="color: var(--primary);">1,247</div>
+                            <div class="risk-detail">En faena actualmente</div>
+                        </div>
+                        <div class="risk-card neutral">
+                            <div class="risk-label">Empresas Subcontratistas</div>
+                            <div class="risk-value" style="color: var(--primary);">27</div>
+                            <div class="risk-detail">Contratos activos</div>
+                        </div>
+                        <div class="risk-card ok">
+                            <div class="risk-label">Cumplimiento Documental</div>
+                            <div class="risk-value">92%</div>
+                            <div class="risk-detail">Promedio general</div>
+                        </div>
+                        <div class="risk-card ok">
+                            <div class="risk-label">Cumplimiento Turnos</div>
+                            <div class="risk-value">96%</div>
+                            <div class="risk-detail">Jornada legal</div>
+                        </div>
+                    </div>
+                    <div class="risk-grid" style="margin-top: 1rem;">
+                        <div class="risk-card warning">
+                            <div class="risk-label">Docs. por Vencer (30 días)</div>
+                            <div class="risk-value">87</div>
+                            <div class="risk-detail">Requieren renovación</div>
+                        </div>
+                        <div class="risk-card critical">
+                            <div class="risk-label">Docs. Vencidos</div>
+                            <div class="risk-value">12</div>
+                            <div class="risk-detail">Trabajadores afectados</div>
+                        </div>
+                        <div class="risk-card warning">
+                            <div class="risk-label">Alertas Exceso Horas</div>
+                            <div class="risk-value">8</div>
+                            <div class="risk-detail">Esta semana</div>
+                        </div>
+                        <div class="risk-card neutral">
+                            <div class="risk-label">Autorizaciones Pendientes</div>
+                            <div class="risk-value" style="color: var(--primary);">5</div>
+                            <div class="risk-detail">Por aprobar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos Placeholder -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Cumplimiento por Empresa</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 200px; background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+                            [Gráfico de barras: % cumplimiento por empresa]
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Evolución Mensual</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 200px; background: linear-gradient(135deg, #dcfce7 0%, #f3f4f6 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-style: italic;">
+                            [Gráfico de líneas: evolución últimos 6 meses]
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipos de Informes -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3>Tipos de Informes Disponibles</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo de Informe</th>
+                                <th>Descripción</th>
+                                <th>Frecuencia</th>
+                                <th>Formatos</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Informe de Exposición Legal</strong></td>
+                                <td>Ranking de riesgo, incumplimientos y tendencias</td>
+                                <td>Semanal/Mensual</td>
+                                <td><span class="badge badge-neutral">PDF</span> <span class="badge badge-neutral">Excel</span></td>
+                                <td><button class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Generar</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estado Documental</strong></td>
+                                <td>Detalle de documentación por trabajador y empresa</td>
+                                <td>Mensual</td>
+                                <td><span class="badge badge-neutral">PDF</span> <span class="badge badge-neutral">Excel</span> <span class="badge badge-neutral">CSV</span></td>
+                                <td><button class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Generar</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Control de Turnos</strong></td>
+                                <td>Análisis de jornadas laborales y cumplimiento legal</td>
+                                <td>Semanal</td>
+                                <td><span class="badge badge-neutral">PDF</span> <span class="badge badge-neutral">Excel</span></td>
+                                <td><button class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Generar</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Historial de Autorizaciones</strong></td>
+                                <td>Registro de autorizaciones con trazabilidad completa</td>
+                                <td>Mensual</td>
+                                <td><span class="badge badge-neutral">PDF</span></td>
+                                <td><button class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Generar</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Auditoría para Fiscalización</strong></td>
+                                <td>Informe completo para Dirección del Trabajo</td>
+                                <td>Trimestral</td>
+                                <td><span class="badge badge-neutral">PDF</span></td>
+                                <td><button class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Generar</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Generador de Informes Personalizados -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent); margin-right: 8px;"></i> Generador de Informes Personalizados</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Informe</label>
+                            <select class="form-input">
+                                <option>Exposición Legal</option>
+                                <option>Estado Documental</option>
+                                <option>Control de Turnos</option>
+                                <option>Autorizaciones</option>
+                                <option>Informe Ejecutivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Período</label>
+                            <select class="form-input">
+                                <option>Última semana</option>
+                                <option>Último mes</option>
+                                <option>Último trimestre</option>
+                                <option>Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Empresa</label>
+                            <select class="form-input">
+                                <option>Todas las empresas</option>
+                                <option>Constructora Los Andes</option>
+                                <option>Sodexo Chile</option>
+                                <option>Komatsu Cummins</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Formato</label>
+                            <select class="form-input">
+                                <option>PDF</option>
+                                <option>Excel (.xlsx)</option>
+                                <option>CSV</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary">
+                            <i class="fa-solid fa-file-export"></i> Generar Informe
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fa-solid fa-clock"></i> Programar Envío Automático
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informes Programados -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Informes Programados</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Informe</th>
+                                <th>Frecuencia</th>
+                                <th>Destinatarios</th>
+                                <th>Próximo Envío</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Informe Ejecutivo Mensual</strong></td>
+                                <td>Mensual (día 1)</td>
+                                <td>gerencia@empresa.cl</td>
+                                <td>01/01/2025</td>
+                                <td><span class="badge badge-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Editar</button>
+                                    <button class="btn btn-outline btn-sm" style="color: var(--danger);">Desactivar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cumplimiento Semanal</strong></td>
+                                <td>Semanal (lunes)</td>
+                                <td>rrhh@empresa.cl</td>
+                                <td>23/12/2024</td>
+                                <td><span class="badge badge-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Editar</button>
+                                    <button class="btn btn-outline btn-sm" style="color: var(--danger);">Desactivar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alertas Diarias</strong></td>
+                                <td>Diaria (08:00)</td>
+                                <td>supervisores@empresa.cl</td>
+                                <td>17/12/2024</td>
+                                <td><span class="badge badge-success">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Editar</button>
+                                    <button class="btn btn-outline btn-sm" style="color: var(--danger);">Desactivar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== AUTORIZACIONES FORMALES ========== -->
+        <div id="autorizaciones" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2 style="color: var(--primary); margin-bottom: 4px;">Buzón de Autorizaciones</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Cada autorización genera un registro legal trazable</p>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active">Pendientes (4)</button>
+                <button class="tab-btn">Aprobadas</button>
+                <button class="tab-btn">Rechazadas</button>
+            </div>
+
+            <!-- Autorización Formal -->
+            <div class="autorizacion-card">
+                <div class="autorizacion-header">
+                    <div>
+                        <strong style="font-size: 1rem;">SOL-2024-4023</strong>
+                        <span class="badge badge-warning" style="margin-left: 10px;">Pendiente</span>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Hace 2 horas</span>
+                </div>
+                <div class="autorizacion-body">
+                    <h4 style="margin-bottom: 1rem;">Solicitud: Excepción Ingreso sin Examen de Altura</h4>
+                    
+                    <div class="autorizacion-grid">
+                        <div class="autorizacion-field">
+                            <label>Trabajador</label>
+                            <span>Ana Fernández Rojas (18.765.432-1)</span>
+                        </div>
+                        <div class="autorizacion-field">
+                            <label>Empresa</label>
+                            <span>Komatsu Cummins</span>
+                        </div>
+                        <div class="autorizacion-field">
+                            <label>Contrato</label>
+                            <span>460005589</span>
+                        </div>
+                        <div class="autorizacion-field">
+                            <label>Solicitante</label>
+                            <span>Carlos Muñoz (Supervisor Turno A)</span>
+                        </div>
+                        <div class="autorizacion-field">
+                            <label>Fecha/Hora Solicitud</label>
+                            <span>16/12/2024 14:32:18</span>
+                        </div>
+                        <div class="autorizacion-field">
+                            <label>Vigencia Solicitada</label>
+                            <span>48 horas</span>
+                        </div>
+                    </div>
+
+                    <div class="fundamento-legal">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <strong>Fundamento Legal Aplicable:</strong>
+                        <p style="margin-top: 4px; font-size: 0.9rem;">Art. 184 Código del Trabajo - Deber de protección del empleador. DS 594 Art. 53 - Exámenes ocupacionales.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Justificación (Obligatoria) <span class="required">*</span></label>
+                        <textarea class="form-textarea" rows="3" placeholder="Ingrese la justificación para aprobar o rechazar esta solicitud..."></textarea>
+                    </div>
+
+                    <div class="autorizacion-actions">
+                        <button class="btn btn-success" onclick="openModal('confirmar-aprobacion')">
+                            <i class="fa-solid fa-check"></i> Aprobar con Registro
+                        </button>
+                        <button class="btn btn-danger">
+                            <i class="fa-solid fa-times"></i> Rechazar
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fa-solid fa-arrow-up"></i> Escalar a Gerencia
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fa-solid fa-file-pdf"></i> Previsualizar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CUMPLIMIENTO DOCUMENTAL ========== -->
+        <div id="documental" class="view-section">
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-folder-open"></i>
+                <div class="alert-content">
+                    <strong>47 trabajadores con documentación vencida pero ACTIVOS EN FAENA</strong>
+                    <small>Esto constituye riesgo de responsabilidad subsidiaria inmediata.</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Estados Documentales Críticos</h3>
+                    <input type="text" placeholder="Buscar RUT o nombre..." style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+                </div>
+                <div class="card-body">
+                    <div class="doc-status-grid">
+                        <!-- Crítico: Vencido pero activo -->
+                        <div class="doc-status-row critical">
+                            <div>
+                                <strong>Juan Pérez Díaz</strong>
+                                <div class="doc-chain">
+                                    <span>Examen Altura</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                    <span>Cons. Los Andes</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                    <span>Faena Principal</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-danger">VENCIDO</span>
+                            <span class="badge badge-danger">ACTIVO EN FAENA</span>
+                            <button class="btn btn-danger btn-sm">Bloquear Acceso</button>
+                        </div>
+                        
+                        <!-- Crítico: Cargado pero inválido -->
+                        <div class="doc-status-row critical">
+                            <div>
+                                <strong>María González S.</strong>
+                                <div class="doc-chain">
+                                    <span>Contrato Trabajo</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                    <span>Servicios Mineros</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                    <span>Faena Norte</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-danger">INVÁLIDO</span>
+                            <span class="badge badge-neutral">Formato incorrecto</span>
+                            <button class="btn btn-outline btn-sm">Notificar</button>
+                        </div>
+
+                        <!-- Warning: No corresponde a faena -->
+                        <div class="doc-status-row warning">
+                            <div>
+                                <strong>Pedro Soto M.</strong>
+                                <div class="doc-chain">
+                                    <span>ODI Firmada</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                    <span>Komatsu</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                    <span style="color: var(--warning); font-weight: 600;">⚠️ Faena Sur (no coincide)</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-warning">VÁLIDO</span>
+                            <span class="badge badge-warning">FAENA INCORRECTA</span>
+                            <button class="btn btn-warning btn-sm">Regularizar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CONFIGURACIÓN ========== -->
+        <div id="config" class="view-section">
+            <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Configuración del Sistema</h2>
+            
+            <div class="config-grid">
+                <div class="config-card">
+                    <h4><i class="fa-solid fa-file-circle-check"></i> Documentos Obligatorios por Perfil</h4>
+                    <div class="config-item">
+                        <label>Trabajador General</label>
+                        <span class="config-value">8 documentos</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Conductor de Vehículos</label>
+                        <span class="config-value">12 documentos</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Trabajo en Altura</label>
+                        <span class="config-value">10 documentos</span>
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
+                        <i class="fa-solid fa-pen"></i> Editar Perfiles
+                    </button>
+                </div>
+
+                <div class="config-card">
+                    <h4><i class="fa-solid fa-bell"></i> Umbrales de Alerta</h4>
+                    <div class="config-item">
+                        <label>Días antes de vencimiento</label>
+                        <span class="config-value">15 días</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Horas para alerta crítica</label>
+                        <span class="config-value">48 horas</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Máx. incumplimientos para bloqueo</label>
+                        <span class="config-value">3 eventos</span>
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
+                        <i class="fa-solid fa-sliders"></i> Configurar
+                    </button>
+                </div>
+
+                <div class="config-card">
+                    <h4><i class="fa-solid fa-building"></i> Reglas por Cliente/Faena</h4>
+                    <div class="config-item">
+                        <label>Faena Principal</label>
+                        <span class="config-value">Regla Estándar</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Faena Norte</label>
+                        <span class="config-value">Alta Seguridad</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Faena Sur</label>
+                        <span class="config-value">Regla Estándar</span>
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
+                        <i class="fa-solid fa-sitemap"></i> Gestionar Faenas
+                    </button>
+                </div>
+
+                <div class="config-card">
+                    <h4><i class="fa-solid fa-clock-rotate-left"></i> Días de Gracia</h4>
+                    <div class="config-item">
+                        <label>Renovación de documentos</label>
+                        <span class="config-value">5 días</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Primera alerta F30</label>
+                        <span class="config-value">3 días</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Bloqueo automático</label>
+                        <span class="config-value">0 días (inmediato)</span>
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
+                        <i class="fa-solid fa-calendar"></i> Ajustar Plazos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== F30 ========== -->
+        <div id="f30" class="view-section">
+            <h2 style="color: var(--primary); margin-bottom: 0.5rem;">Control de Obligaciones Laborales (F30)</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Validación para liberación de Estados de Pago</p>
+
+            <div class="card" style="border-left: 4px solid var(--danger);">
+                <div class="card-header">
+                    <div>
+                        <h3>Constructora Los Andes</h3>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Periodo: Diciembre 2024</span>
+                    </div>
+                    <span class="badge badge-danger">ESTADO DE PAGO BLOQUEADO</span>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr>
+                            <td style="width: 50%;">
+                                <strong>Certificado F30-1 (Dirección del Trabajo)</strong><br>
+                                <small style="color: var(--text-muted);">Antecedentes laborales y previsionales</small>
+                            </td>
+                            <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Validado</span></td>
+                            <td><button class="btn btn-outline btn-sm">Ver PDF</button></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Comprobantes de Pago Remuneraciones</strong><br>
+                                <small style="color: var(--text-muted);">155 Trabajadores</small>
+                            </td>
+                            <td><span class="badge badge-success"><i class="fa-solid fa-check"></i> Validado</span></td>
+                            <td><button class="btn btn-outline btn-sm">Ver Carpeta</button></td>
+                        </tr>
+                        <tr style="background: #fef2f2;">
+                            <td>
+                                <strong>Pago Cotizaciones (Previred)</strong><br>
+                                <small style="color: var(--danger);">⚠️ Diferencia: $4.500.000</small>
+                            </td>
+                            <td><span class="badge badge-danger"><i class="fa-solid fa-times"></i> Rechazado</span></td>
+                            <td><button class="btn btn-danger btn-sm">Ver Detalle Deuda</button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CONTRATOS ========== -->
+        <div id="contratos" class="view-section">
+            <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Control de Responsabilidad Subsidiaria</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Gestión de contratos y su impacto en la exposición legal del mandante.</p>
+            
+            <div class="card">
+                <div class="card-body">
+                    <p style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        <i class="fa-solid fa-file-contract" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        Vista detallada de contratos en desarrollo...
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-autorizacion">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-stamp" style="color: var(--accent); margin-right: 8px;"></i> Confirmar Autorización</h3>
+            <button class="btn btn-icon btn-outline" onclick="closeModal('autorizacion')">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert-banner warning" style="margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div class="alert-content">
+                    <strong>Esta acción genera un registro legal</strong>
+                    <small>Su nombre, justificación y fecha quedarán registrados como respaldo ante fiscalización.</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Responsable de Autorización</label>
+                <input type="text" class="form-input" value="Raúl Lavín - Gerente RRHH" disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Justificación <span class="required">*</span></label>
+                <textarea class="form-textarea" rows="3" placeholder="Describa el motivo de la autorización..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fundamento Legal</label>
+                <select class="form-select">
+                    <option>Art. 184 C.T. - Deber de protección (emergencia operacional)</option>
+                    <option>Art. 22 C.T. - Excepción jornada por necesidad</option>
+                    <option>Otro (especificar en justificación)</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('autorizacion')">Cancelar</button>
+            <button class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Confirmar y Registrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-bloqueo">
+    <div class="modal">
+        <div class="modal-header" style="background: #fef2f2; border-bottom-color: #fecaca;">
+            <h3 style="color: var(--danger);"><i class="fa-solid fa-ban" style="margin-right: 8px;"></i> Confirmar Bloqueo de Empresa</h3>
+            <button class="btn btn-icon btn-outline" onclick="closeModal('bloqueo')">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert-banner critical" style="margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-gavel"></i>
+                <div class="alert-content">
+                    <strong>Acción de alto impacto</strong>
+                    <small>Esta acción bloqueará el acceso de TODOS los trabajadores de esta empresa a la faena.</small>
+                </div>
+            </div>
+            
+            <p style="margin-bottom: 1rem;"><strong>Empresa:</strong> Constructora Los Andes</p>
+            <p style="margin-bottom: 1rem;"><strong>Trabajadores afectados:</strong> 155</p>
+            <p style="margin-bottom: 1.5rem;"><strong>Motivo:</strong> Índice de exposición legal 87/100 - Deuda previsional activa</p>
+            
+            <div class="form-group">
+                <label class="form-label">Observaciones <span class="required">*</span></label>
+                <textarea class="form-textarea" rows="3" placeholder="Registre las observaciones del bloqueo..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('bloqueo')">Cancelar</button>
+            <button class="btn btn-danger">
+                <i class="fa-solid fa-ban"></i> Confirmar Bloqueo
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Navegación principal
+    function showView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.getElementById(viewId).classList.add('active');
+        
+        document.querySelectorAll('.menu-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        const btn = document.getElementById('btn-' + viewId);
+        if (btn) btn.classList.add('active');
+    }
+
+    // Mostrar detalle de empresa
+    function showEmpresaDetalle(empresaId) {
+        // Ocultar todas las vistas
+        document.querySelectorAll('.view-section').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // Mostrar vista de detalle
+        document.getElementById('empresa-detalle').classList.add('active');
+        
+        // Mostrar tab de resumen por defecto
+        showEmpresaTab('resumen');
+        
+        // Actualizar menú
+        document.querySelectorAll('.menu-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        document.getElementById('btn-empresas').classList.add('active');
+    }
+
+    // Navegación de tabs dentro de detalle empresa
+    function showEmpresaTab(tabId) {
+        // Ocultar todas las tabs
+        document.querySelectorAll('.empresa-tab').forEach(el => {
+            el.classList.remove('active');
+            el.style.display = 'none';
+        });
+        
+        // Mostrar tab seleccionada
+        const tab = document.getElementById('tab-' + tabId);
+        if (tab) {
+            tab.classList.add('active');
+            tab.style.display = 'block';
+        }
+        
+        // Actualizar botones de tabs
+        document.querySelectorAll('.tabs .tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+
+    // Simulación Semáforo
+    function simularAcceso(tipo) {
+        document.querySelectorAll('.semaforo-result').forEach(el => {
+            el.classList.remove('show');
+        });
+        document.getElementById('result-' + tipo).classList.add('show');
+    }
+
+    // Modales
+    function openModal(id) {
+        document.getElementById('modal-' + id).classList.add('show');
+    }
+    function closeModal(id) {
+        document.getElementById('modal-' + id).classList.remove('show');
+    }
+
+    // Cerrar modal al hacer clic fuera
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('show');
+            }
+        });
+    });
+
+    // Inicializar - Ahora empieza en Empresas Contratistas
+    document.addEventListener('DOMContentLoaded', () => {
+        showView('empresas');
+    });
+</script>
+
+</body>
+</html>

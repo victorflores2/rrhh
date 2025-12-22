@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCMinero V3 - Sistema de Control Laboral</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0c1929;
+            --secondary: #1a2d45;
+            --accent: #d97706;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --info: #3b82f6;
+            --info-bg: #eff6ff;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --text: #334155;
+            --text-muted: #64748b;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: #f1f5f9; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: var(--text);
+        }
+
+        /* SIDEBAR */
+        .sidebar { 
+            width: 280px; 
+            background: linear-gradient(180deg, var(--primary) 0%, #0a1628 100%);
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+        
+        .logo { 
+            padding: 1.25rem; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent) 0%, #b45309 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .logo-text h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo-text span { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .menu { flex: 1; padding: 0.75rem 0; overflow-y: auto; }
+        
+        .menu-section {
+            padding: 0.75rem 1.25rem 0.4rem;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .menu-item { 
+            padding: 0.7rem 1.25rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            cursor: pointer; 
+            color: rgba(255,255,255,0.7); 
+            transition: all 0.2s; 
+            text-decoration: none; 
+            border-left: 3px solid transparent;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .menu-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+        .menu-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-item.active { 
+            background: rgba(217, 119, 6, 0.15); 
+            color: white; 
+            border-left-color: var(--accent);
+        }
+        .menu-item .badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .menu-item .badge.warning { background: var(--warning); }
+        .menu-item .badge.info { background: var(--info); }
+
+        /* MAIN AREA */
+        .main { 
+            flex: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        /* ======= REQ 1: BREADCRUMB FIJO ======= */
+        .breadcrumb-bar {
+            background: linear-gradient(90deg, var(--primary) 0%, #1e3a5f 100%);
+            padding: 0.6rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            border-bottom: 2px solid var(--accent);
+        }
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .breadcrumb-item.clickable {
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+        .breadcrumb-item.clickable:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .breadcrumb-item i { font-size: 0.75rem; }
+        .breadcrumb-sep { color: rgba(255,255,255,0.4); font-size: 0.7rem; }
+        .breadcrumb-current {
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .breadcrumb-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .periodo-badge {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .periodo-badge.cerrado {
+            background: var(--danger);
+        }
+        .periodo-badge i { font-size: 0.7rem; }
+        
+        .topbar {
+            background: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 42px;
+            z-index: 100;
+        }
+        .topbar-left h2 { font-size: 1rem; color: var(--primary); font-weight: 600; }
+        .topbar-left p { font-size: 0.75rem; color: var(--text-muted); }
+        .topbar-right { display: flex; gap: 8px; align-items: center; }
+
+        .content { padding: 1.5rem 2rem; flex: 1; }
+
+        /* VIEW SECTIONS */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 1.25rem;
+        }
+        .card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 { font-size: 0.95rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .card-header h3 i { color: var(--accent); }
+        .card-body { padding: 1.25rem; }
+
+        /* KPI GRID */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .kpi-card.critical::before { background: var(--danger); }
+        .kpi-card.warning::before { background: var(--warning); }
+        .kpi-card.ok::before { background: var(--success); }
+        .kpi-card.info::before { background: var(--info); }
+        
+        .kpi-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .kpi-value { font-size: 2rem; font-weight: 700; margin: 6px 0; font-family: 'JetBrains Mono', monospace; }
+        .kpi-card.critical .kpi-value { color: var(--danger); }
+        .kpi-card.warning .kpi-value { color: var(--warning); }
+        .kpi-card.ok .kpi-value { color: var(--success); }
+        .kpi-card.info .kpi-value { color: var(--info); }
+        .kpi-detail { font-size: 0.75rem; color: var(--text-muted); }
+        .kpi-action { 
+            margin-top: 0.75rem; 
+            padding-top: 0.75rem; 
+            border-top: 1px solid var(--border);
+        }
+
+        /* ALERT BANNER */
+        .alert-banner {
+            padding: 0.875rem 1.25rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        .alert-banner.critical {
+            background: linear-gradient(90deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .alert-banner.warning {
+            background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+        .alert-banner.info {
+            background: linear-gradient(90deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+        .alert-banner i { font-size: 1.1rem; }
+        .alert-banner .alert-content { flex: 1; }
+        .alert-banner strong { display: block; margin-bottom: 2px; font-size: 0.9rem; }
+        .alert-banner small { opacity: 0.85; font-size: 0.8rem; }
+
+        /* TABLES */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            text-align: left; 
+            padding: 0.875rem 1rem; 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            color: var(--text-muted); 
+            background: #f8fafc;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+        td { 
+            padding: 0.875rem 1rem; 
+            border-bottom: 1px solid var(--border); 
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+        tr:hover { background: #f8fafc; }
+
+        /* BADGES */
+        .badge { 
+            padding: 3px 8px; 
+            border-radius: 5px; 
+            font-size: 0.65rem; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline-flex; 
+            align-items: center; 
+            gap: 4px;
+        }
+        .badge-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-success { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-info { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
+        .badge-neutral { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+        /* ======= REQ 6: ESTADOS DE ALERTAS ======= */
+        .estado-flow {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .estado-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .estado-dot.pendiente { background: var(--danger); animation: pulse 1.5s infinite; }
+        .estado-dot.en-revision { background: var(--warning); }
+        .estado-dot.atendido { background: var(--info); }
+        .estado-dot.resuelto { background: var(--success); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .estado-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .estado-badge.pendiente { background: #fef2f2; color: var(--danger); }
+        .estado-badge.en-revision { background: #fffbeb; color: var(--warning); }
+        .estado-badge.atendido { background: #eff6ff; color: var(--info); }
+        .estado-badge.resuelto { background: #ecfdf5; color: var(--success); }
+
+        /* ======= REQ 11/22: ESTADO DE ACCESO ======= */
+        .acceso-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .acceso-status.permitido {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+        .acceso-status.sin-acceso {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        .acceso-status i { font-size: 0.9rem; }
+        .acceso-motivo {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .presencia-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .presencia-badge.fuera { background: #f1f5f9; color: #64748b; }
+        .presencia-badge.ingreso { background: #ecfdf5; color: #059669; }
+        .presencia-badge.salida { background: #fffbeb; color: #d97706; }
+
+        /* BUTTONS */
+        .btn { 
+            padding: 7px 14px; 
+            border-radius: 7px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            font-weight: 600; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 5px; 
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1a2d45; transform: translateY(-1px); }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-accent:hover { background: #b45309; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+        .btn-xs { padding: 3px 8px; font-size: 0.7rem; }
+        .btn-icon { padding: 7px; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 3px; margin-bottom: 1.25rem; background: #f1f5f9; padding: 3px; border-radius: 8px; width: fit-content; }
+        .tab-btn { 
+            padding: 8px 16px; 
+            border: none; 
+            background: transparent;
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* ======= REQ 8: TURNOS ======= */
+        .turno-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .turno-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .turno-icon.dia { background: #fef3c7; color: #d97706; }
+        .turno-icon.noche { background: #1e3a5f; color: #94a3b8; }
+        .turno-info { flex: 1; }
+        .turno-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+        .turno-info p { font-size: 0.75rem; color: var(--text-muted); }
+        .turno-stats {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .turno-stat {
+            text-align: center;
+        }
+        .turno-stat-value { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.1rem; }
+        .turno-stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* ======= REQ 17: FOTO CARNÉ ======= */
+        .foto-carnet {
+            width: 60px;
+            height: 75px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            background: #f1f5f9;
+        }
+        .foto-carnet.pendiente {
+            border: 2px dashed var(--warning);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--warning);
+            font-size: 1.2rem;
+        }
+
+        /* ======= REQ 4/10: PARAMETRIZACIÓN ======= */
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .param-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .param-card h4 {
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .param-card h4 i { color: var(--accent); font-size: 0.9rem; }
+        .param-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+        .param-item:last-child { border-bottom: none; }
+        .toggle-switch {
+            width: 36px;
+            height: 20px;
+            background: #cbd5e1;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-switch.active { background: var(--success); }
+        .toggle-switch::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+        .toggle-switch.active::after { left: 18px; }
+
+        /* ======= REQ 5: CUT-OFF ======= */
+        .cutoff-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .cutoff-indicator.vigente { background: #ecfdf5; color: #059669; }
+        .cutoff-indicator.proximo { background: #fffbeb; color: #d97706; }
+        .cutoff-indicator.cerrado { background: #fef2f2; color: #dc2626; }
+
+        /* TIMELINE */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.25rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--danger);
+        }
+        .timeline-item.warning::before { background: var(--warning); box-shadow: 0 0 0 2px var(--warning); }
+        .timeline-item.info::before { background: var(--info); box-shadow: 0 0 0 2px var(--info); }
+        .timeline-item.ok::before { background: var(--success); box-shadow: 0 0 0 2px var(--success); }
+        .timeline-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 3px; }
+        .timeline-content { font-size: 0.85rem; }
+        .timeline-content strong { display: block; margin-bottom: 2px; }
+        .timeline-content p { color: var(--text-muted); font-size: 0.8rem; }
+
+        /* SEMAFORO */
+        .semaforo-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 1.5rem;
+        }
+        .scanner-panel {
+            background: var(--primary);
+            border-radius: 14px;
+            padding: 1.5rem;
+            color: white;
+            text-align: center;
+        }
+        .scanner-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #4ade80;
+        }
+        .scanner-input {
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.875rem;
+            width: 100%;
+            text-align: center;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .scanner-input::placeholder { color: rgba(255,255,255,0.5); }
+
+        .semaforo-result {
+            border-radius: 14px;
+            overflow: hidden;
+            display: none;
+            animation: scaleIn 0.3s ease;
+        }
+        .semaforo-result.show { display: block; }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .semaforo-header {
+            padding: 2rem;
+            color: white;
+            text-align: center;
+        }
+        .semaforo-header.verde { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .semaforo-header.rojo { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+        .semaforo-header.amarillo { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+        .semaforo-header i { font-size: 3rem; margin-bottom: 0.75rem; }
+        .semaforo-header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
+        
+        .semaforo-body {
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 14px 14px;
+        }
+        .semaforo-foto {
+            width: 70px;
+            height: 85px;
+            border-radius: 8px;
+            margin: -50px auto 1rem;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+        .semaforo-info {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .semaforo-info h3 { font-size: 1rem; margin-bottom: 2px; }
+        .semaforo-info p { font-size: 0.8rem; color: var(--text-muted); }
+
+        .motivo-box {
+            padding: 0.875rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        .motivo-box.danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        .motivo-box.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+        .motivo-box.success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+
+        /* ======= REQ 15: CHECKLIST CONTRATO ======= */
+        .checklist {
+            display: grid;
+            gap: 0.5rem;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.5rem 0.75rem;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        .checklist-item i { font-size: 0.85rem; }
+        .checklist-item.ok i { color: var(--success); }
+        .checklist-item.fail i { color: var(--danger); }
+        .checklist-item.pending i { color: var(--warning); }
+
+        /* FORM */
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        .required { color: var(--danger); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 85vh;
+            overflow: hidden;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { font-size: 1rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .modal-header h3 i { color: var(--accent); }
+        .modal-body { padding: 1.25rem; max-height: 55vh; overflow-y: auto; }
+        .modal-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* DRILL DOWN SEMAFOROS */
+        .drill-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .drill-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .drill-card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .drill-card .drill-value {
+            font-family: 'JetBrains Mono';
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .drill-card.rojo .drill-value { color: var(--danger); }
+        .drill-card.amarillo .drill-value { color: var(--warning); }
+        .drill-card.verde .drill-value { color: var(--success); }
+        .drill-card .drill-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* EMPRESA TABS */
+        .empresa-tab { display: none; }
+        .empresa-tab.active { display: block; }
+
+        /* GRID LAYOUTS */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+
+        /* SEARCH BAR */
+        .search-bar {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            width: 200px;
+        }
+        .search-select {
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="logo-text">
+            <h1>SCMinero V3</h1>
+            <span>Control Laboral</span>
+        </div>
+    </div>
+    
+    <div class="menu">
+        <div class="menu-section">Vista Principal</div>
+        <a onclick="showView('empresas')" class="menu-item active" id="btn-empresas">
+            <i class="fa-solid fa-building"></i> 
+            Empresas Contratistas
+        </a>
+        <a onclick="showView('dashboard')" class="menu-item" id="btn-dashboard">
+            <i class="fa-solid fa-chart-pie"></i> 
+            Dashboard Riesgo
+            <span class="badge">3</span>
+        </a>
+
+        <div class="menu-section">Control de Alertas</div>
+        <a onclick="showView('alertas')" class="menu-item" id="btn-alertas">
+            <i class="fa-solid fa-bell"></i> 
+            Gestión Alertas
+            <span class="badge">12</span>
+        </a>
+        <a onclick="showView('incumplimientos')" class="menu-item" id="btn-incumplimientos">
+            <i class="fa-solid fa-file-circle-xmark"></i> 
+            Incumplimientos
+            <span class="badge warning">7</span>
+        </a>
+
+        <div class="menu-section">Control Faena</div>
+        <a onclick="showView('acceso')" class="menu-item" id="btn-acceso">
+            <i class="fa-solid fa-id-card"></i> 
+            Control Acceso
+        </a>
+        <a onclick="showView('turnos')" class="menu-item" id="btn-turnos">
+            <i class="fa-solid fa-calendar-days"></i> 
+            Gestión Turnos
+            <span class="badge info">2</span>
+        </a>
+        <a onclick="showView('autorizaciones')" class="menu-item" id="btn-autorizaciones">
+            <i class="fa-solid fa-stamp"></i> 
+            Autorizaciones
+        </a>
+
+        <div class="menu-section">Documental</div>
+        <a onclick="showView('documental')" class="menu-item" id="btn-documental">
+            <i class="fa-solid fa-folder-open"></i> 
+            Cumplimiento Docs
+        </a>
+        <a onclick="showView('f30')" class="menu-item" id="btn-f30">
+            <i class="fa-solid fa-file-invoice-dollar"></i> 
+            Control F30 / Pagos
+        </a>
+
+        <div class="menu-section">Configuración</div>
+        <a onclick="showView('parametros')" class="menu-item" id="btn-parametros">
+            <i class="fa-solid fa-sliders"></i> 
+            Parametrización
+        </a>
+        <a onclick="showView('reportes')" class="menu-item" id="btn-reportes">
+            <i class="fa-solid fa-chart-bar"></i> 
+            Reportes RRHH
+        </a>
+    </div>
+</div>
+
+<div class="main">
+    <!-- REQ 1: BREADCRUMB FIJO -->
+    <div class="breadcrumb-bar">
+        <div class="breadcrumb-item clickable" onclick="cambiarMandante()">
+            <i class="fa-solid fa-industry"></i>
+            <span>CODELCO</span>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.6rem; margin-left: 4px;"></i>
+        </div>
+        <span class="breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+        <div class="breadcrumb-item clickable" onclick="cambiarContratista()">
+            <i class="fa-solid fa-building"></i>
+            <span>Constructora Los Andes</span>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.6rem; margin-left: 4px;"></i>
+        </div>
+        <span class="breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+        <div class="breadcrumb-current">
+            <i class="fa-solid fa-location-dot"></i>
+            Faena División El Teniente
+        </div>
+        <div class="breadcrumb-right">
+            <!-- REQ 5: INDICADOR DE PERÍODO -->
+            <div class="periodo-badge">
+                <i class="fa-solid fa-calendar"></i>
+                Período: Diciembre 2024
+            </div>
+            <div class="periodo-badge" title="Cierre: 10 Ene 23:59">
+                <i class="fa-solid fa-clock"></i>
+                Cut-off en 19 días
+            </div>
+        </div>
+    </div>
+
+    <div class="topbar">
+        <div class="topbar-left">
+            <h2>Sistema de Control Laboral</h2>
+            <p>Última sincronización: hace 5 minutos</p>
+        </div>
+        <div class="topbar-right">
+            <button class="btn btn-outline btn-icon" title="Notificaciones">
+                <i class="fa-solid fa-bell"></i>
+            </button>
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-user"></i> Raúl Lavín
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ========== EMPRESAS CONTRATISTAS ========== -->
+        <div id="empresas" class="view-section active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 2px;">Empresas Contratistas</h2>
+                    <p style="color: var(--text-muted); font-size: 0.8rem;">Vista consolidada de cumplimiento por empresa</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Exportar</button>
+                    <button class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nueva Empresa</button>
+                </div>
+            </div>
+
+            <!-- REQ 10: SEMÁFOROS CON DRILL-DOWN -->
+            <div class="drill-grid">
+                <div class="drill-card rojo" onclick="filtrarPorEstado('critico')">
+                    <div class="drill-value">3</div>
+                    <div class="drill-label">BLOQUEADAS / CRÍTICO</div>
+                </div>
+                <div class="drill-card amarillo" onclick="filtrarPorEstado('alerta')">
+                    <div class="drill-value">4</div>
+                    <div class="drill-label">EN ALERTA</div>
+                </div>
+                <div class="drill-card verde" onclick="filtrarPorEstado('ok')">
+                    <div class="drill-value">20</div>
+                    <div class="drill-label">AL DÍA</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <div class="card-body" style="padding: 0.875rem;">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Buscar RUT, Nombre...">
+                        <select class="search-select">
+                            <option>Todos los estados</option>
+                            <option>Bloqueado</option>
+                            <option>Alerta</option>
+                            <option>Al día</option>
+                        </select>
+                        <select class="search-select">
+                            <option>Todas las faenas</option>
+                            <option>Div. El Teniente</option>
+                            <option>Div. Andina</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm"><i class="fa-solid fa-filter"></i> Más filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Principal -->
+            <div class="card">
+                <div class="card-header" style="background: #f8fafc;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Mostrando <strong>27</strong> empresas</span>
+                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-columns"></i> Columnas</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox"></th>
+                                <th style="width: 70px;">Riesgo</th>
+                                <th>Empresa</th>
+                                <th>RUT</th>
+                                <th style="text-align: center;">Dotación</th>
+                                <th style="text-align: center;">% Docs</th>
+                                <th style="text-align: center;">F30</th>
+                                <!-- REQ 12: NO ACREDITADO = NO PAGADO -->
+                                <th style="text-align: center;">Rem. Acred.</th>
+                                <th>Vencimiento</th>
+                                <th style="width: 80px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fef2f2; cursor: pointer;" onclick="showEmpresaDetalle('andes')">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="estado-dot pendiente"></span>
+                                        <span style="font-weight: 700; color: var(--danger);">87</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>CONSTRUCTORA LOS ANDES</strong>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">ADC: Juan Pérez</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.75rem;">76.543.210-K</td>
+                                <td style="text-align: center;">
+                                    <span style="color: var(--danger);">155/150</span>
+                                </td>
+                                <td style="text-align: center;"><span class="badge badge-danger">68%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-danger">DEUDA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-danger">12 pend.</span></td>
+                                <td>31/12/2024</td>
+                                <td>
+                                    <button class="btn btn-outline btn-xs"><i class="fa-solid fa-eye"></i></button>
+                                    <button class="btn btn-danger btn-xs"><i class="fa-solid fa-ban"></i></button>
+                                </td>
+                            </tr>
+                            <tr style="background: #fffbeb; cursor: pointer;">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="estado-dot en-revision"></span>
+                                        <span style="font-weight: 700; color: var(--warning);">52</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>KOMATSU CUMMINS</strong>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">ADC: María Torres</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.75rem;">77.891.234-5</td>
+                                <td style="text-align: center;">85/90</td>
+                                <td style="text-align: center;"><span class="badge badge-warning">92%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-warning">OBS</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>30/06/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-xs"><i class="fa-solid fa-eye"></i></button>
+                                </td>
+                            </tr>
+                            <tr style="cursor: pointer;">
+                                <td><input type="checkbox" onclick="event.stopPropagation()"></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="estado-dot resuelto"></span>
+                                        <span style="font-weight: 700; color: var(--success);">12</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>SODEXO CHILE</strong>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">ADC: Carlos Muñoz</div>
+                                </td>
+                                <td style="font-family: 'JetBrains Mono'; font-size: 0.75rem;">78.901.234-5</td>
+                                <td style="text-align: center;">398/400</td>
+                                <td style="text-align: center;"><span class="badge badge-success">100%</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">AL DÍA</span></td>
+                                <td style="text-align: center;"><span class="badge badge-success">OK</span></td>
+                                <td>31/12/2025</td>
+                                <td>
+                                    <button class="btn btn-outline btn-xs"><i class="fa-solid fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== REQ 6: GESTIÓN DE ALERTAS CON ESTADOS ========== -->
+        <div id="alertas" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 2px;">Gestión de Alertas</h2>
+                    <p style="color: var(--text-muted); font-size: 0.8rem;">Flujo de estados: Pendiente → En Revisión → Atendido → Resuelto</p>
+                </div>
+            </div>
+
+            <!-- KPIs por Estado -->
+            <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="kpi-card critical">
+                    <div class="kpi-label">Pendientes</div>
+                    <div class="kpi-value">8</div>
+                    <div class="kpi-detail">Sin asignar</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-label">En Revisión</div>
+                    <div class="kpi-value">4</div>
+                    <div class="kpi-detail">Asignadas</div>
+                </div>
+                <div class="kpi-card info">
+                    <div class="kpi-label">Atendidas</div>
+                    <div class="kpi-value">15</div>
+                    <div class="kpi-detail">Con acción registrada</div>
+                </div>
+                <div class="kpi-card ok">
+                    <div class="kpi-label">Resueltas (30d)</div>
+                    <div class="kpi-value">47</div>
+                    <div class="kpi-detail">Cerradas</div>
+                </div>
+            </div>
+
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div class="alert-content">
+                    <strong>8 alertas pendientes sin asignar</strong>
+                    <small>Las alertas sin atención por más de 48h pueden ser evidencia de negligencia ante fiscalización.</small>
+                </div>
+            </div>
+
+            <!-- Tabs por Estado -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filtrarAlertas('pendiente')">Pendientes (8)</button>
+                <button class="tab-btn" onclick="filtrarAlertas('en-revision')">En Revisión (4)</button>
+                <button class="tab-btn" onclick="filtrarAlertas('atendido')">Atendidas (15)</button>
+                <button class="tab-btn" onclick="filtrarAlertas('resuelto')">Resueltas</button>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Prioridad</th>
+                                <th>Alerta</th>
+                                <th>Empresa</th>
+                                <th>Generada</th>
+                                <th>Tiempo sin atención</th>
+                                <th>Responsable</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fef2f2;">
+                                <td>
+                                    <span class="estado-badge pendiente">
+                                        <span class="estado-dot pendiente"></span>
+                                        PENDIENTE
+                                    </span>
+                                </td>
+                                <td><span class="badge badge-danger">CRÍTICA</span></td>
+                                <td>
+                                    <strong>Deuda previsional detectada en Previred</strong>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Monto: $4.500.000</div>
+                                </td>
+                                <td>Constructora Los Andes</td>
+                                <td style="font-size: 0.8rem;">13/12/2024 08:00</td>
+                                <td style="color: var(--danger); font-weight: 700;">72 horas</td>
+                                <td><span class="badge badge-neutral">Sin asignar</span></td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="openModal('atender-alerta')">
+                                        <i class="fa-solid fa-hand"></i> Atender
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr style="background: #fffbeb;">
+                                <td>
+                                    <span class="estado-badge en-revision">
+                                        <span class="estado-dot en-revision"></span>
+                                        EN REVISIÓN
+                                    </span>
+                                </td>
+                                <td><span class="badge badge-warning">MEDIA</span></td>
+                                <td>
+                                    <strong>Examen altura física vencido</strong>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">3 trabajadores afectados</div>
+                                </td>
+                                <td>Komatsu Cummins</td>
+                                <td style="font-size: 0.8rem;">14/12/2024 10:30</td>
+                                <td style="color: var(--warning); font-weight: 600;">24 horas</td>
+                                <td>María Muñoz</td>
+                                <td>
+                                    <button class="btn btn-info btn-sm" onclick="openModal('atender-alerta')">
+                                        <i class="fa-solid fa-check"></i> Registrar Acción
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="estado-badge atendido">
+                                        <span class="estado-dot atendido"></span>
+                                        ATENDIDO
+                                    </span>
+                                </td>
+                                <td><span class="badge badge-info">BAJA</span></td>
+                                <td>
+                                    <strong>Licencia conducir próxima a vencer</strong>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Trabajador: Pedro González</div>
+                                </td>
+                                <td>Sodexo Chile</td>
+                                <td style="font-size: 0.8rem;">10/12/2024 14:00</td>
+                                <td style="color: var(--info);">Atendida</td>
+                                <td>Carlos Vega</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fa-solid fa-check-double"></i> Resolver
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== REQ 8/18/19: GESTIÓN DE TURNOS ========== -->
+        <div id="turnos" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 2px;">Gestión de Turnos</h2>
+                    <p style="color: var(--text-muted); font-size: 0.8rem;">Control de turnos, dotación y validación anti-solapamiento</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i> Importar Turnos</button>
+                    <button class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Nuevo Turno</button>
+                </div>
+            </div>
+
+            <!-- REQ 19: Ventana de Cambios -->
+            <div class="alert-banner info">
+                <i class="fa-solid fa-clock"></i>
+                <div class="alert-content">
+                    <strong>Ventana de cambios activa</strong>
+                    <small>Los cambios de turno se pueden subir hasta 12 horas antes del inicio. Fuera de ventana requiere autorización.</small>
+                </div>
+                <button class="btn btn-info btn-sm">Configurar</button>
+            </div>
+
+            <div class="grid-2">
+                <!-- Turnos Definidos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-calendar-days"></i> Turnos Definidos</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="turno-card">
+                            <div class="turno-icon dia"><i class="fa-solid fa-sun"></i></div>
+                            <div class="turno-info">
+                                <h4>Turno 7x7 Día (A)</h4>
+                                <p>07:00 - 19:00 | Rotación semanal</p>
+                            </div>
+                            <div class="turno-stats">
+                                <div class="turno-stat">
+                                    <div class="turno-stat-value" style="color: var(--success);">78</div>
+                                    <div class="turno-stat-label">Asignados</div>
+                                </div>
+                                <div class="turno-stat">
+                                    <div class="turno-stat-value">80</div>
+                                    <div class="turno-stat-label">Dotación</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm"><i class="fa-solid fa-edit"></i></button>
+                        </div>
+                        <div class="turno-card">
+                            <div class="turno-icon noche"><i class="fa-solid fa-moon"></i></div>
+                            <div class="turno-info">
+                                <h4>Turno 7x7 Noche (A)</h4>
+                                <p>19:00 - 07:00 | Rotación semanal</p>
+                            </div>
+                            <div class="turno-stats">
+                                <div class="turno-stat">
+                                    <div class="turno-stat-value" style="color: var(--warning);">42</div>
+                                    <div class="turno-stat-label">Asignados</div>
+                                </div>
+                                <div class="turno-stat">
+                                    <div class="turno-stat-value">45</div>
+                                    <div class="turno-stat-label">Dotación</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm"><i class="fa-solid fa-edit"></i></button>
+                        </div>
+                        <div class="turno-card">
+                            <div class="turno-icon dia"><i class="fa-solid fa-sun"></i></div>
+                            <div class="turno-info">
+                                <h4>Turno 4x3 Administrativo</h4>
+                                <p>08:00 - 18:00 | Lun-Jue</p>
+                            </div>
+                            <div class="turno-stats">
+                                <div class="turno-stat">
+                                    <div class="turno-stat-value" style="color: var(--success);">35</div>
+                                    <div class="turno-stat-label">Asignados</div>
+                                </div>
+                                <div class="turno-stat">
+                                    <div class="turno-stat-value">35</div>
+                                    <div class="turno-stat-label">Dotación</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm"><i class="fa-solid fa-edit"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REQ 18: Alertas Anti-Solapamiento -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-triangle-exclamation"></i> Alertas de Turno</h3>
+                        <span class="badge badge-danger">2 conflictos</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert-banner critical" style="margin-bottom: 0.75rem;">
+                            <i class="fa-solid fa-user-clock"></i>
+                            <div class="alert-content">
+                                <strong>Solapamiento detectado</strong>
+                                <small>Juan Pérez (12.345.678-9) asignado a turno día y noche el 20/12</small>
+                            </div>
+                            <button class="btn btn-danger btn-xs">Resolver</button>
+                        </div>
+                        <div class="alert-banner warning" style="margin-bottom: 0;">
+                            <i class="fa-solid fa-bed"></i>
+                            <div class="alert-content">
+                                <strong>Descanso insuficiente</strong>
+                                <small>Pedro González: 6h entre turnos (mínimo: 11h)</small>
+                            </div>
+                            <button class="btn btn-warning btn-xs">Resolver</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trabajadores con Exceso de Jornada -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-clock"></i> Trabajadores con Exceso de Jornada</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-danger btn-sm"><i class="fa-solid fa-ban"></i> Bloquear Seleccionados</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Trabajador</th>
+                                <th>Empresa</th>
+                                <th>Turno Actual</th>
+                                <th>Hrs. Semanales</th>
+                                <th>Exceso</th>
+                                <th>Estado Acceso</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fef2f2;">
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div class="foto-carnet" style="width: 40px; height: 50px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; background: #e2e8f0;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Juan Pérez Díaz</strong>
+                                            <div style="font-size: 0.7rem; color: var(--text-muted);">12.345.678-9</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Constructora Los Andes</td>
+                                <td>7x7 Día (A)</td>
+                                <td style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--danger);">56h</td>
+                                <td><span class="badge badge-danger">+11h</span></td>
+                                <td>
+                                    <!-- REQ 2/22: Nuevo lenguaje de acceso -->
+                                    <div class="acceso-status sin-acceso">
+                                        <i class="fa-solid fa-ban"></i> Sin acceso
+                                    </div>
+                                    <div class="acceso-motivo">Motivo: Exceso de jornada</div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline btn-xs" onclick="openModal('autorizacion')">
+                                        <i class="fa-solid fa-stamp"></i> Autorizar
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== REQ 11/22: CONTROL DE ACCESO - SEMÁFORO ========== -->
+        <div id="acceso" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 2px;">Control de Acceso</h2>
+                    <p style="color: var(--text-muted); font-size: 0.8rem;">Verificación de autorización vs ingreso real (pistoleo/QR/torniquete)</p>
+                </div>
+            </div>
+
+            <div class="semaforo-container">
+                <div class="scanner-panel">
+                    <div class="scanner-icon"><i class="fa-solid fa-qrcode"></i></div>
+                    <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Escanear Credencial</h3>
+                    <p style="font-size: 0.8rem; opacity: 0.7;">Ingrese RUT o escanee QR</p>
+                    <input type="text" class="scanner-input" placeholder="Ej: 12.345.678-9">
+                    <div style="display: grid; gap: 8px; margin-top: 1rem;">
+                        <button class="btn btn-success" style="width: 100%; justify-content: center;" onclick="simularAcceso('verde')">
+                            <i class="fa-solid fa-check"></i> Simular: Acceso Permitido
+                        </button>
+                        <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="simularAcceso('rojo')">
+                            <i class="fa-solid fa-ban"></i> Simular: Sin Acceso
+                        </button>
+                        <button class="btn btn-warning" style="width: 100%; justify-content: center;" onclick="simularAcceso('amarillo')">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Simular: Con Observaciones
+                        </button>
+                    </div>
+                </div>
+
+                <div class="resultado-panel">
+                    <!-- Resultado VERDE -->
+                    <div class="semaforo-result" id="result-verde">
+                        <div class="semaforo-header verde">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <h1>ACCESO PERMITIDO</h1>
+                        </div>
+                        <div class="semaforo-body">
+                            <div class="semaforo-foto">
+                                <i class="fa-solid fa-user" style="font-size: 1.5rem; color: #94a3b8;"></i>
+                            </div>
+                            <div class="semaforo-info">
+                                <h3>Carlos Muñoz Bravo</h3>
+                                <p>RUT: 15.234.567-8 | Sodexo Chile</p>
+                            </div>
+                            <!-- REQ 22: Distinguir autorizado vs ingresó -->
+                            <div class="grid-2" style="gap: 0.75rem; margin-top: 1rem;">
+                                <div style="text-align: center; padding: 0.75rem; background: #ecfdf5; border-radius: 8px;">
+                                    <div style="font-size: 0.7rem; color: #059669; font-weight: 600;">AUTORIZACIÓN</div>
+                                    <div style="font-weight: 700; color: #047857;">✓ Permitido</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.75rem; background: #f1f5f9; border-radius: 8px;">
+                                    <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">PRESENCIA</div>
+                                    <div style="font-weight: 600; color: var(--text);">Esperando ingreso</div>
+                                </div>
+                            </div>
+                            <div class="motivo-box success">
+                                <strong><i class="fa-solid fa-check-circle"></i> Documentación al día</strong>
+                                <p style="margin-top: 4px; font-size: 0.8rem;">Turno asignado: 7x7 Día (A) | 07:00 - 19:00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado ROJO -->
+                    <div class="semaforo-result" id="result-rojo">
+                        <div class="semaforo-header rojo">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                            <h1>SIN ACCESO</h1>
+                        </div>
+                        <div class="semaforo-body">
+                            <div class="semaforo-foto">
+                                <i class="fa-solid fa-user" style="font-size: 1.5rem; color: #94a3b8;"></i>
+                            </div>
+                            <div class="semaforo-info">
+                                <h3>Juan Pérez Díaz</h3>
+                                <p>RUT: 12.345.678-9 | Constructora Los Andes</p>
+                            </div>
+                            <div class="motivo-box danger">
+                                <strong><i class="fa-solid fa-ban"></i> Motivo del bloqueo:</strong>
+                                <ul style="margin: 8px 0 0 20px; font-size: 0.85rem;">
+                                    <li>Examen mutual vencido (15/11/2024)</li>
+                                    <li>Exceso de jornada semanal (+11h)</li>
+                                </ul>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 1rem;">
+                                <button class="btn btn-outline" style="flex: 1; justify-content: center;">
+                                    <i class="fa-solid fa-arrow-up"></i> Escalar
+                                </button>
+                                <button class="btn btn-accent" style="flex: 1; justify-content: center;" onclick="openModal('autorizacion')">
+                                    <i class="fa-solid fa-stamp"></i> Autorizar Excepción
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado AMARILLO -->
+                    <div class="semaforo-result" id="result-amarillo">
+                        <div class="semaforo-header amarillo">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h1>ACCESO CON OBSERVACIONES</h1>
+                        </div>
+                        <div class="semaforo-body">
+                            <div class="semaforo-foto">
+                                <i class="fa-solid fa-user" style="font-size: 1.5rem; color: #94a3b8;"></i>
+                            </div>
+                            <div class="semaforo-info">
+                                <h3>Pedro González Mora</h3>
+                                <p>RUT: 16.789.012-3 | Komatsu Cummins</p>
+                            </div>
+                            <div class="motivo-box warning">
+                                <strong><i class="fa-solid fa-clock"></i> Observaciones:</strong>
+                                <ul style="margin: 8px 0 0 20px; font-size: 0.85rem;">
+                                    <li>Licencia de conducir vence en 5 días</li>
+                                    <li>Charla ODI pendiente de renovación</li>
+                                </ul>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem; text-align: center;">
+                                Puede ingresar pero debe regularizar documentación
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== REQ 4/20/21: PARAMETRIZACIÓN ========== -->
+        <div id="parametros" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 2px;">Parametrización por Mandante</h2>
+                    <p style="color: var(--text-muted); font-size: 0.8rem;">Configuración de documentos, controles y validaciones</p>
+                </div>
+                <button class="btn btn-primary btn-sm"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active">Documentos Requeridos</button>
+                <button class="tab-btn">Exámenes Médicos</button>
+                <button class="tab-btn">Validaciones</button>
+                <button class="tab-btn">Cut-offs</button>
+                <button class="tab-btn">Integraciones</button>
+            </div>
+
+            <div class="param-grid">
+                <!-- Documentos Obligatorios -->
+                <div class="param-card">
+                    <h4><i class="fa-solid fa-file-contract"></i> Documentos Trabajador</h4>
+                    <div class="param-item">
+                        <span>Contrato de Trabajo</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Cédula de Identidad</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Certificado Mutual (Apto)</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>ODI Firmada</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Licencia de Conducir</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <!-- REQ 17: Foto Carné -->
+                    <div class="param-item">
+                        <span>Foto Tipo Carné</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+
+                <!-- REQ 21: Exámenes Específicos -->
+                <div class="param-card">
+                    <h4><i class="fa-solid fa-stethoscope"></i> Exámenes Médicos</h4>
+                    <div class="param-item">
+                        <span>Examen Pre-ocupacional</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Altura Física (>1.8m)</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Altura Geográfica (>3000m)</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Examen Psicosensométrico</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Test de Drogas</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+
+                <!-- REQ 20: Validación Auto vs Manual -->
+                <div class="param-card">
+                    <h4><i class="fa-solid fa-robot"></i> Validación Automática</h4>
+                    <div class="param-item">
+                        <span>Vigencia de documentos</span>
+                        <span class="badge badge-success">AUTO</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Coincidencia RUT/Ficha</span>
+                        <span class="badge badge-success">AUTO</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Mutual: APTO/NO APTO</span>
+                        <span class="badge badge-success">AUTO</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Firma de contrato</span>
+                        <span class="badge badge-info">MANUAL</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Contenido legal contrato</span>
+                        <span class="badge badge-info">MANUAL</span>
+                    </div>
+                </div>
+
+                <!-- REQ 5: Cut-offs -->
+                <div class="param-card">
+                    <h4><i class="fa-solid fa-calendar-xmark"></i> Fechas de Cierre (Cut-off)</h4>
+                    <div class="param-item">
+                        <span>Cierre de Período</span>
+                        <span style="font-weight: 600;">Día 10, 23:59</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Cotizaciones Previsionales</span>
+                        <span style="font-weight: 600;">Día 13, 23:59</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Subida de Liquidaciones</span>
+                        <span style="font-weight: 600;">Día 15, 23:59</span>
+                    </div>
+                    <div class="param-item">
+                        <span>Cambios de Turno</span>
+                        <span style="font-weight: 600;">12h antes</span>
+                    </div>
+                </div>
+
+                <!-- REQ 23: Integraciones -->
+                <div class="param-card">
+                    <h4><i class="fa-solid fa-plug"></i> Integraciones Externas</h4>
+                    <div class="param-item">
+                        <span>Buk (Asistencia)</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>GeoVictoria</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Nubox (Nómina)</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Control Torniquete</span>
+                        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+
+                <!-- REQ 11: Campos Inclusión -->
+                <div class="param-card">
+                    <h4><i class="fa-solid fa-users"></i> Campos de Inclusión</h4>
+                    <div class="param-item">
+                        <span>Domicilio/Región</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Etnia (autoidentificación)</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>Discapacidad (certificado)</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                    <div class="param-item">
+                        <span>% Cumplimiento Inclusión</span>
+                        <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== DASHBOARD RIESGO ========== -->
+        <div id="dashboard" class="view-section">
+            <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem;">Dashboard de Riesgo Legal</h2>
+            
+            <div class="kpi-grid">
+                <div class="kpi-card critical">
+                    <div class="kpi-label">Empresas Bloqueadas</div>
+                    <div class="kpi-value">3</div>
+                    <div class="kpi-detail">Deuda previsional / F30</div>
+                </div>
+                <div class="kpi-card critical">
+                    <div class="kpi-label">Trabajadores en Riesgo</div>
+                    <div class="kpi-value">47</div>
+                    <div class="kpi-detail">Doc. vencido pero activos</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-label">Alertas Pendientes</div>
+                    <div class="kpi-value">12</div>
+                    <div class="kpi-detail">>48h sin respuesta</div>
+                </div>
+                <div class="kpi-card ok">
+                    <div class="kpi-label">Empresas al Día</div>
+                    <div class="kpi-value">24</div>
+                    <div class="kpi-detail">Sin observaciones</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-ranking-star"></i> Ranking de Exposición Legal</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Riesgo</th>
+                                <th>Empresa</th>
+                                <th>Índice</th>
+                                <th>Incumplimientos</th>
+                                <th>F30</th>
+                                <th>Rem. Acreditada</th>
+                                <th>Decisión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="estado-dot pendiente"></span></td>
+                                <td><strong>CONSTRUCTORA LOS ANDES</strong></td>
+                                <td style="font-family: 'JetBrains Mono'; font-weight: 700; color: var(--danger);">87/100</td>
+                                <td><span class="badge badge-danger">7 eventos</span></td>
+                                <td><span class="badge badge-danger">DEUDA</span></td>
+                                <td><span class="badge badge-danger">12 pend.</span></td>
+                                <td><button class="btn btn-danger btn-xs"><i class="fa-solid fa-ban"></i> Bloquear</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== REQ 9: REPORTES RRHH ========== -->
+        <div id="reportes" class="view-section">
+            <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem;">Reportes y Métricas RRHH</h2>
+            
+            <div class="kpi-grid">
+                <div class="kpi-card info">
+                    <div class="kpi-label">Ausentismo (Mes)</div>
+                    <div class="kpi-value">3.2%</div>
+                    <div class="kpi-detail">Meta: <5%</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-label">Licencias Médicas</div>
+                    <div class="kpi-value">23</div>
+                    <div class="kpi-detail">Este mes</div>
+                </div>
+                <div class="kpi-card ok">
+                    <div class="kpi-label">Cumplimiento Turno</div>
+                    <div class="kpi-value">94%</div>
+                    <div class="kpi-detail">Promedio faena</div>
+                </div>
+                <div class="kpi-card info">
+                    <div class="kpi-label">Rotación</div>
+                    <div class="kpi-value">8%</div>
+                    <div class="kpi-detail">Últimos 12 meses</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-chart-line"></i> Cumplimiento por Empresa</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                            <i class="fa-solid fa-chart-bar" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p>Gráfico de cumplimiento por empresa</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-file-export"></i> Exportar Reportes</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; gap: 0.5rem;">
+                            <button class="btn btn-outline" style="justify-content: flex-start;">
+                                <i class="fa-solid fa-file-excel"></i> Reporte Cumplimiento Documental
+                            </button>
+                            <button class="btn btn-outline" style="justify-content: flex-start;">
+                                <i class="fa-solid fa-file-excel"></i> Reporte Ausentismo por Empresa
+                            </button>
+                            <button class="btn btn-outline" style="justify-content: flex-start;">
+                                <i class="fa-solid fa-file-excel"></i> Reporte Incumplimientos (Fiscalización)
+                            </button>
+                            <button class="btn btn-outline" style="justify-content: flex-start;">
+                                <i class="fa-solid fa-file-pdf"></i> Informe Ejecutivo Mensual
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Otras vistas placeholder -->
+        <div id="incumplimientos" class="view-section">
+            <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem;">Registro de Incumplimientos</h2>
+            <div class="card">
+                <div class="card-body">
+                    <p style="color: var(--text-muted);">Vista de incumplimientos con timeline...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="autorizaciones" class="view-section">
+            <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem;">Gestión de Autorizaciones</h2>
+            <div class="card">
+                <div class="card-body">
+                    <p style="color: var(--text-muted);">Vista de autorizaciones formales...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="documental" class="view-section">
+            <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem;">Cumplimiento Documental</h2>
+            
+            <!-- REQ 15: Checklist de Contrato -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-clipboard-check"></i> Validación de Contratos</h3>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                        El sistema valida forma mínima (firmas, fechas, RUT), no cláusulas legales de fondo.
+                    </p>
+                    <div class="checklist">
+                        <div class="checklist-item ok">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Contrato firmado por ambas partes</span>
+                        </div>
+                        <div class="checklist-item ok">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Fechas de inicio y término válidas</span>
+                        </div>
+                        <div class="checklist-item ok">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Nombre de empresa coincide</span>
+                        </div>
+                        <div class="checklist-item ok">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>RUT trabajador coincide con ficha</span>
+                        </div>
+                        <div class="checklist-item fail">
+                            <i class="fa-solid fa-times-circle"></i>
+                            <span>Timbre de empresa (no detectado)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REQ 24: Finiquito Crítico -->
+            <div class="alert-banner warning">
+                <i class="fa-solid fa-file-signature"></i>
+                <div class="alert-content">
+                    <strong>3 trabajadores sin finiquito registrado</strong>
+                    <small>Estos trabajadores terminaron contrato pero no se ha subido finiquito. El sistema los trata como vigentes.</small>
+                </div>
+                <button class="btn btn-warning btn-sm">Ver Detalle</button>
+            </div>
+        </div>
+
+        <div id="f30" class="view-section">
+            <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem;">Control F30 / Pagos</h2>
+            
+            <!-- REQ 12: No acreditado = No pagado -->
+            <div class="alert-banner critical">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+                <div class="alert-content">
+                    <strong>12 trabajadores sin remuneración acreditada</strong>
+                    <small>El contratista indica que pagó, pero no ha subido respaldo (liquidación firmada).</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <p style="color: var(--text-muted);">Vista de control F30 y pagos...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ========== MODALES ========== -->
+
+<!-- REQ 16: Modal Atender Alerta (con acción obligatoria) -->
+<div class="modal-overlay" id="modal-atender-alerta">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-hand"></i> Atender Alerta</h3>
+            <button class="btn btn-icon btn-outline" onclick="closeModal('atender-alerta')">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert-banner warning" style="margin-bottom: 1rem;">
+                <i class="fa-solid fa-info-circle"></i>
+                <div class="alert-content">
+                    <strong>Acción obligatoria</strong>
+                    <small>"Atender" no es solo mirar. Debe registrar la gestión realizada.</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Alerta</label>
+                <input type="text" class="form-input" value="Deuda previsional detectada - Constructora Los Andes" disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Asignar a <span class="required">*</span></label>
+                <select class="form-select">
+                    <option>Seleccionar responsable...</option>
+                    <option>María Muñoz - Analista RRHH</option>
+                    <option>Carlos Vega - Supervisor</option>
+                    <option>Raúl Lavín - Gerente RRHH</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Acción Realizada <span class="required">*</span></label>
+                <select class="form-select">
+                    <option>Seleccionar tipo de acción...</option>
+                    <option>Notificación enviada al contratista</option>
+                    <option>Reunión agendada</option>
+                    <option>Bloqueo aplicado</option>
+                    <option>Escalamiento a gerencia</option>
+                    <option>Otra (especificar)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Detalle / Nota de Gestión <span class="required">*</span></label>
+                <textarea class="form-textarea" rows="3" placeholder="Describa la acción tomada y próximos pasos..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nuevo Estado</label>
+                <div style="display: flex; gap: 8px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="estado" checked> En Revisión
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="estado"> Atendido
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="estado"> Resuelto
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('atender-alerta')">Cancelar</button>
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Registrar Gestión
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Autorización Formal -->
+<div class="modal-overlay" id="modal-autorizacion">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-stamp"></i> Autorizar Excepción</h3>
+            <button class="btn btn-icon btn-outline" onclick="closeModal('autorizacion')">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert-banner warning" style="margin-bottom: 1rem;">
+                <i class="fa-solid fa-gavel"></i>
+                <div class="alert-content">
+                    <strong>Esta acción genera registro legal</strong>
+                    <small>Su nombre, justificación y fecha quedarán como respaldo ante fiscalización.</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Responsable de Autorización</label>
+                <input type="text" class="form-input" value="Raúl Lavín - Gerente RRHH" disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Justificación <span class="required">*</span></label>
+                <textarea class="form-textarea" rows="3" placeholder="Describa el motivo de la autorización..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fundamento Legal</label>
+                <select class="form-select">
+                    <option>Art. 184 C.T. - Deber de protección (emergencia operacional)</option>
+                    <option>Art. 22 C.T. - Excepción jornada por necesidad</option>
+                    <option>Otro (especificar en justificación)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Vigencia de la Autorización</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="date" class="form-input" style="flex: 1;">
+                    <span style="align-self: center;">hasta</span>
+                    <input type="date" class="form-input" style="flex: 1;">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('autorizacion')">Cancelar</button>
+            <button class="btn btn-success">
+                <i class="fa-solid fa-check"></i> Confirmar y Registrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Navegación principal
+    function showView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        const btn = document.getElementById('btn-' + viewId);
+        if (btn) btn.classList.add('active');
+    }
+
+    // Detalle de empresa
+    function showEmpresaDetalle(empresaId) {
+        // Implementar navegación a detalle
+        alert('Navegar a detalle de empresa: ' + empresaId);
+    }
+
+    // Simulación Semáforo
+    function simularAcceso(tipo) {
+        document.querySelectorAll('.semaforo-result').forEach(el => el.classList.remove('show'));
+        document.getElementById('result-' + tipo).classList.add('show');
+    }
+
+    // Filtros
+    function filtrarPorEstado(estado) {
+        alert('Filtrar empresas por estado: ' + estado);
+    }
+
+    function filtrarAlertas(estado) {
+        document.querySelectorAll('.tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // Modales
+    function openModal(id) {
+        document.getElementById('modal-' + id).classList.add('show');
+    }
+    
+    function closeModal(id) {
+        document.getElementById('modal-' + id).classList.remove('show');
+    }
+
+    // Breadcrumb
+    function cambiarMandante() {
+        alert('Selector de Mandante');
+    }
+    
+    function cambiarContratista() {
+        alert('Selector de Contratista');
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('show');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
